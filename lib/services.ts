@@ -159,7 +159,7 @@ export const services: Service[] = [
     icon: '🪪', 
     color: 'bg-blue-700', 
     category: 'nid', 
-    price: 500, 
+    price: 3500, 
     popular: true,
     inputLabel: 'নতুন আইডি কার্ডের প্রয়োজনীয় তথ্য', 
     inputPlaceholder: 'প্রয়োজনীয় তথ্য পূরণ করুন' 
