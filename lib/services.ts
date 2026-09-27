@@ -150,6 +150,21 @@ export const services: Service[] = [
     inputPlaceholder: 'NID নম্বর / নতুন জেলা, উপজেলা, ইউনিয়ন/ওয়ার্ড, গ্রাম' 
   },
 
+
+    { 
+    id: 'new-id-card', 
+    title: 'নতুন আইডি কার্ড', 
+    titleEn: 'New ID Card', 
+    description: 'নতুন জাতীয় পরিচয়পত্রের জন্য আবেদন', 
+    icon: '🪪', 
+    color: 'bg-blue-700', 
+    category: 'nid', 
+    price: 500, 
+    popular: true,
+    inputLabel: 'নতুন আইডি কার্ডের প্রয়োজনীয় তথ্য', 
+    inputPlaceholder: 'প্রয়োজনীয় তথ্য পূরণ করুন' 
+  },
+
   { 
     id: 'smart-id-card', 
     title: 'স্মার্ট ID কার্ড', 

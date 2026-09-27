@@ -40,6 +40,32 @@ export default function DashboardPage() {
   // আইডি কার্ড সংশোধিত তথ্য চাহিদা ও ছবি জমা দেওয়ার স্টেট
   const [correctionDetails, setCorrectionDetails] = useState('')
   const [uploadedFiles, setUploadedFiles] = useState<{ nidImage?: string; birthImage?: string }>({})
+
+  // 🪪 নতুন আইডি কার্ডের বিশেষ ফর্ম
+  const [newNidForm, setNewNidForm] = useState({
+    applicantName: '',
+    birthRegistration: '',
+    fatherNid: '',
+    motherNid: '',
+    educationCertificate: '',
+    citizenshipCertificate: '',
+    married: 'না',
+    spouseNid: '',
+    marriageProof: '',
+    addressProof: '',
+    prescribedFormInfo: ''
+  })
+
+  const [newNidFiles, setNewNidFiles] = useState<{
+    birthCertificate?: string
+    fatherNidCopy?: string
+    motherNidCopy?: string
+    educationCertificate?: string
+    citizenshipCertificate?: string
+    spouseNidCopy?: string
+    marriageProof?: string
+    addressProof?: string
+  }>({})
   
   // 🔥 নতুন জন্মনিবন্ধন এর বিশেষ স্টেট
   const [birthForm, setBirthForm] = useState({
@@ -132,6 +158,22 @@ export default function DashboardPage() {
       permanentAddress: '',
       guardianPhone: profile?.phone || ''
     })
+
+    setNewNidForm({
+      applicantName: '',
+      birthRegistration: '',
+      fatherNid: '',
+      motherNid: '',
+      educationCertificate: '',
+      citizenshipCertificate: '',
+      married: 'না',
+      spouseNid: '',
+      marriageProof: '',
+      addressProof: '',
+      prescribedFormInfo: ''
+    })
+
+    setNewNidFiles({})
   }
 
   // ছবি আপলোড হ্যান্ডলার (আইডি কার্ড / জন্ম নিবন্ধন)
@@ -153,6 +195,9 @@ export default function DashboardPage() {
 
   const isNewBirthService = activeService?.id === 'new-birth-reg' || 
                             activeService?.title?.includes('নতুন জন্মনিবন্ধন')
+
+  const isNewIdCardService = activeService?.id === 'new-id-card' || 
+                             activeService?.title?.includes('নতুন আইডি কার্ড')
 
   // 🔐 ডাইনামিক রেজিস্ট্রেশন ও লগইন
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -212,11 +257,40 @@ export default function DashboardPage() {
     }
   }
 
-  // সেবা অর্ডার সাবমিট (সংশোধন, নতুন জন্মনিবন্ধন ও অন্যান্য)
+  // সেবা অর্ডার সাবমিট (নতুন আইডি কার্ড, সংশোধন, নতুন জন্মনিবন্ধন ও অন্যান্য)
   const handlePlaceOrder = async (service: any) => {
     let payload = ''
 
-    if (isNewBirthService) {
+    if (isNewIdCardService) {
+      if (!newNidForm.applicantName.trim()) return alert('অনুগ্রহ করে আবেদনকারীর পূর্ণ নাম দিন!')
+      if (!newNidForm.birthRegistration.trim()) return alert('অনুগ্রহ করে জন্ম নিবন্ধন সনদের তথ্য দিন!')
+      if (!newNidForm.fatherNid.trim()) return alert('অনুগ্রহ করে বাবার NID-এর তথ্য দিন!')
+      if (!newNidForm.motherNid.trim()) return alert('অনুগ্রহ করে মায়ের NID-এর তথ্য দিন!')
+      if (!newNidForm.citizenshipCertificate.trim()) return alert('অনুগ্রহ করে নাগরিকত্ব/ঠিকানার সনদের তথ্য দিন!')
+      if (!newNidForm.addressProof.trim()) return alert('অনুগ্রহ করে ঠিকানার প্রমাণের তথ্য দিন!')
+
+      if (newNidForm.married === 'হ্যাঁ') {
+        if (!newNidForm.spouseNid.trim()) return alert('বিবাহিত হলে স্বামী/স্ত্রীর NID-এর তথ্য দিন!')
+        if (!newNidForm.marriageProof.trim()) return alert('বিবাহিত হলে বিবাহের প্রমাণপত্রের তথ্য দিন!')
+      }
+
+      payload = JSON.stringify({
+        service_type: 'নতুন আইডি কার্ড',
+        applicant_name: newNidForm.applicantName.trim(),
+        birth_registration: newNidForm.birthRegistration.trim(),
+        father_nid: newNidForm.fatherNid.trim(),
+        mother_nid: newNidForm.motherNid.trim(),
+        education_certificate: newNidForm.educationCertificate.trim() || 'প্রযোজ্য নয়',
+        citizenship_address_certificate: newNidForm.citizenshipCertificate.trim(),
+        married: newNidForm.married,
+        spouse_nid: newNidForm.spouseNid.trim() || 'প্রযোজ্য নয়',
+        marriage_proof: newNidForm.marriageProof.trim() || 'প্রযোজ্য নয়',
+        address_proof: newNidForm.addressProof.trim(),
+        prescribed_form_info: newNidForm.prescribedFormInfo.trim() || 'দেওয়া হয়নি',
+        documents: newNidFiles,
+        biometric_note: 'ছবি, আঙুলের ছাপ ও অন্যান্য বায়োমেট্রিক তথ্য নির্বাচন অফিসে দিতে হবে'
+      })
+    } else if (isNewBirthService) {
       if (!birthForm.childName.trim()) return alert('অনুগ্রহ করে বাচ্চার নাম (বাংলা ও ইংরেজি) দিন!')
       if (!birthForm.motherNidOrBirth.trim()) return alert('অনুগ্রহ করে মাতার NID / জন্মনিবন্ধন নম্বর দিন!')
       if (!birthForm.fatherNidOrBirth.trim()) return alert('অনুগ্রহ করে পিতার NID / জন্মনিবন্ধন নম্বর দিন!')
@@ -261,7 +335,9 @@ export default function DashboardPage() {
     if (rpcError || (data && !data.success)) {
       alert(rpcError?.message || data?.message || 'অর্ডার করতে সমস্যা হয়েছে।')
     } else {
-      if (isNewBirthService) {
+      if (isNewIdCardService) {
+        alert('✅ আপনার নতুন আইডি কার্ডের আবেদন সফলভাবে জমা হয়েছে!')
+      } else if (isNewBirthService) {
         alert('✅ আপনার নতুন জন্মনিবন্ধন আবেদন সফলভাবে জমা হয়েছে! ২৪ ঘণ্টার মধ্যেই অনলাইন হয়ে যাবে।')
       } else if (isCorrectionService) {
         alert('✅ আপনার সংশোধন আবেদন সফল হয়েছে! ৩ দিনের মধ্যে সমাধান হয়ে যাবে।')
@@ -766,8 +842,182 @@ export default function DashboardPage() {
             {/* ফর্ম বডি */}
             <div className="py-4 overflow-y-auto space-y-4">
 
-              {/* 🌟 কেইস ১: নতুন জন্মনিবন্ধন ফর্ম */}
-              {isNewBirthService ? (
+              {/* 🌟 কেইস ১: নতুন আইডি কার্ড ফর্ম */}
+              {isNewIdCardService ? (
+                <div className="space-y-4">
+                  <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl flex items-start gap-2.5 text-blue-800">
+                    <CheckCircle2 size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h5 className="text-xs font-black">নতুন আইডি কার্ডের প্রয়োজনীয় তথ্য</h5>
+                      <p className="text-[10px] text-blue-700 font-semibold mt-0.5">নিচের প্রয়োজনীয় তথ্যগুলো পূরণ করুন। প্রযোজ্য না হলে সেই ঘরটি ফাঁকা রাখতে পারবেন।</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      আবেদনকারীর পূর্ণ নাম <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newNidForm.applicantName}
+                      onChange={e => setNewNidForm({ ...newNidForm, applicantName: e.target.value })}
+                      placeholder="পূর্ণ নাম লিখুন"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800"
+                      autoFocus
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      জন্ম নিবন্ধন সনদের তথ্য <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={newNidForm.birthRegistration}
+                      onChange={e => setNewNidForm({ ...newNidForm, birthRegistration: e.target.value })}
+                      placeholder="জন্ম নিবন্ধন নম্বর / জন্ম নিবন্ধনের প্রয়োজনীয় তথ্য"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800 resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        বাবার NID-এর তথ্য <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newNidForm.fatherNid}
+                        onChange={e => setNewNidForm({ ...newNidForm, fatherNid: e.target.value })}
+                        placeholder="বাবার NID নম্বর / তথ্য"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        মায়ের NID-এর তথ্য <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newNidForm.motherNid}
+                        onChange={e => setNewNidForm({ ...newNidForm, motherNid: e.target.value })}
+                        placeholder="মায়ের NID নম্বর / তথ্য"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      নিজের শিক্ষাগত সনদ (যদি থাকে)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={newNidForm.educationCertificate}
+                      onChange={e => setNewNidForm({ ...newNidForm, educationCertificate: e.target.value })}
+                      placeholder="সনদের নাম / বোর্ড / প্রতিষ্ঠান / প্রয়োজনীয় তথ্য"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800 resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      নাগরিকত্ব/ঠিকানার সনদের তথ্য <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={newNidForm.citizenshipCertificate}
+                      onChange={e => setNewNidForm({ ...newNidForm, citizenshipCertificate: e.target.value })}
+                      placeholder="সনদের নম্বর / ইউনিয়ন বা পৌরসভা / প্রয়োজনীয় তথ্য"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800 resize-none"
+                    />
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 space-y-3">
+                    <label className="block text-xs font-black text-slate-800">বৈবাহিক অবস্থা <span className="text-red-500">*</span></label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setNewNidForm({ ...newNidForm, married: 'না', spouseNid: '', marriageProof: '' })}
+                        className={`py-2.5 rounded-xl text-xs font-bold border transition cursor-pointer ${newNidForm.married === 'না' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-slate-600 border-slate-200'}`}
+                      >
+                        অবিবাহিত
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNewNidForm({ ...newNidForm, married: 'হ্যাঁ' })}
+                        className={`py-2.5 rounded-xl text-xs font-bold border transition cursor-pointer ${newNidForm.married === 'হ্যাঁ' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-slate-600 border-slate-200'}`}
+                      >
+                        বিবাহিত
+                      </button>
+                    </div>
+
+                    {newNidForm.married === 'হ্যাঁ' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">স্বামী/স্ত্রীর NID <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            value={newNidForm.spouseNid}
+                            onChange={e => setNewNidForm({ ...newNidForm, spouseNid: e.target.value })}
+                            placeholder="স্বামী/স্ত্রীর NID নম্বর"
+                            className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-400 text-xs font-semibold text-slate-800"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">বিবাহের প্রমাণপত্র <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            value={newNidForm.marriageProof}
+                            onChange={e => setNewNidForm({ ...newNidForm, marriageProof: e.target.value })}
+                            placeholder="কাবিন/বিবাহের প্রমাণের তথ্য"
+                            className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-400 text-xs font-semibold text-slate-800"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      ঠিকানার প্রমাণ <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={newNidForm.addressProof}
+                      onChange={e => setNewNidForm({ ...newNidForm, addressProof: e.target.value })}
+                      placeholder="বিদ্যুৎ বিল / হোল্ডিং ট্যাক্স / অন্যান্য ঠিকানার প্রমাণের তথ্য"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800 resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      নির্ধারিত ফরম ও প্রয়োজনীয় তথ্য
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={newNidForm.prescribedFormInfo}
+                      onChange={e => setNewNidForm({ ...newNidForm, prescribedFormInfo: e.target.value })}
+                      placeholder="ফরম নম্বর / অন্যান্য প্রয়োজনীয় তথ্য"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800 resize-none"
+                    />
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80">
+                    <p className="text-xs font-black text-amber-900 flex items-center gap-1.5">
+                      <ShieldCheck size={16} className="text-amber-700" />
+                      <span>বায়োমেট্রিক তথ্য</span>
+                    </p>
+                    <p className="text-[10px] text-amber-800 font-semibold mt-1.5 leading-relaxed">
+                      ছবি, আঙুলের ছাপ ও অন্যান্য বায়োমেট্রিক তথ্য নির্বাচন অফিসে দিতে হবে।
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* 🌟 কেইস ২: নতুন জন্মনিবন্ধন ফর্ম */
+                isNewBirthService ? (
                 <div className="space-y-3.5">
                   {/* বিশেষ গ্যারান্টি ব্যানার */}
                   <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl flex items-center gap-2.5 text-emerald-800">
@@ -871,7 +1121,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : isCorrectionService ? (
-                /* 🌟 কেইস ২: আইডি কার্ড সংশোধন ফর্ম */
+                /* 🌟 কেইস ৩: আইডি কার্ড সংশোধন ফর্ম */
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -953,7 +1203,7 @@ export default function DashboardPage() {
                     autoFocus
                   />
                 </div>
-              )}
+              ))}
 
             </div>
 
@@ -972,7 +1222,7 @@ export default function DashboardPage() {
                 disabled={submitting} 
                 className="flex-1 py-3 bg-[#7c3aed] hover:bg-purple-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg text-xs sm:text-sm transition cursor-pointer disabled:opacity-50"
               >
-                {submitting ? 'লোড হচ্ছে...' : <><Send size={15} /><span>{isNewBirthService ? 'আবেদন জমা দিন' : 'অর্ডার কনফার্ম করুন'}</span></>}
+                {submitting ? 'লোড হচ্ছে...' : <><Send size={15} /><span>{(isNewBirthService || isNewIdCardService) ? 'আবেদন জমা দিন' : 'অর্ডার কনফার্ম করুন'}</span></>}
               </button>
             </div>
 
