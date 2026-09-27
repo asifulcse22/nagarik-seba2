@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.nagarik_seba3.twa",
+      "sha256_cert_fingerprints": [
+        "70:EE:C8:54:B4:1E:1F:D9:EF:47:2B:BD:6D:B1:DC:99:F5:67:81:95:F4:BA:39:F0:30:50:DB:39:AE:BC:81:68"
+      ]
+    }
+  }
+]
