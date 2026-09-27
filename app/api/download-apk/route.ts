@@ -8,12 +8,11 @@ export const maxDuration = 60;
 // মেমোরি ক্যাশ - যাতে দ্বিতীয়বার ক্লিক করলে ০.০১ সেকেন্ডে সাথে সাথে ডাউনলোড হয়
 let memoryCachedApk: Uint8Array | null = null;
 
-// Vercel Edge CDN হেডার - গ্লোবাল CDN থেকে ০.১ সেকেন্ডে ডাউনলোড হবে
 const APK_HEADERS = (byteLength: number) => ({
   'Content-Type': 'application/vnd.android.package-archive',
   'Content-Disposition': 'attachment; filename="Nagarik-Sheba.apk"',
   'Content-Length': String(byteLength),
-  'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=86400, immutable',
+  'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=86400',
 });
 
 // ফিক্সড Signing Keystore (যাতে assetlinks.json-এর সাথে ১০০% মিলে যায় এবং উপরের লিংক বার না দেখায়)
@@ -54,7 +53,91 @@ function extractApkFromZip(buf: Buffer): Buffer | null {
   return null;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+
+  // অ্যাপ ওপেন করার সময় Splash Screen-এ "ন" বা "N"-এর বদলে সুন্দর গোলাকার Loading Icon দেখানোর PNG
+  if (searchParams.get('splash') === 'loader') {
+    const W = 512, H = 512;
+    const raw = Buffer.alloc(H * (W * 4 + 1));
+    const cx = 256, cy = 256, outerR = 54, innerR = 38;
+
+    for (let y = 0; y < H; y++) {
+      const rowOff = y * (W * 4 + 1);
+      raw[rowOff] = 0;
+      for (let x = 0; x < W; x++) {
+        const dx = x - cx, dy = y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const pxOff = rowOff + 1 + x * 4;
+        let r = 255, g = 255, b = 255;
+
+        if (dist >= innerR - 1.5 && dist <= outerR + 1.5) {
+          const edgeAlpha = Math.min(
+            Math.max(0, dist - (innerR - 1.5)) / 1.5,
+            Math.max(0, outerR + 1.5 - dist) / 1.5,
+            1
+          );
+          const norm = (Math.atan2(dy, dx) + Math.PI) / (2 * Math.PI);
+          const midR = (innerR + outerR) / 2;
+          const halfThick = (outerR - innerR) / 2;
+          const cap2Angle = -Math.PI + 0.72 * 2 * Math.PI;
+          const dCap1 = Math.hypot(x - (cx - midR), y - cy);
+          const dCap2 = Math.hypot(
+            x - (cx + midR * Math.cos(cap2Angle)),
+            y - (cy + midR * Math.sin(cap2Angle))
+          );
+
+          let arc = 0;
+          if (norm < 0.72) arc = 0.25 + 0.75 * (norm / 0.72);
+          else if (dCap1 <= halfThick) arc = 0.25;
+          else if (dCap2 <= halfThick) arc = 1.0;
+
+          const ringR = Math.round(237 * (1 - arc) + 109 * arc);
+          const ringG = Math.round(233 * (1 - arc) + 40 * arc);
+          const ringB = Math.round(254 * (1 - arc) + 217 * arc);
+
+          r = Math.round(255 * (1 - edgeAlpha) + ringR * edgeAlpha);
+          g = Math.round(255 * (1 - edgeAlpha) + ringG * edgeAlpha);
+          b = Math.round(255 * (1 - edgeAlpha) + ringB * edgeAlpha);
+        }
+
+        raw[pxOff] = r;
+        raw[pxOff + 1] = g;
+        raw[pxOff + 2] = b;
+        raw[pxOff + 3] = 255;
+      }
+    }
+
+    const makeChunk = (type: string, data: Buffer) => {
+      const len = Buffer.alloc(4);
+      len.writeUInt32BE(data.length, 0);
+      const t = Buffer.from(type, 'ascii');
+      const crc = Buffer.alloc(4);
+      crc.writeUInt32BE(zlib.crc32(Buffer.concat([t, data])) >>> 0, 0);
+      return Buffer.concat([len, t, data, crc]);
+    };
+
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(W, 0);
+    ihdr.writeUInt32BE(H, 4);
+    ihdr[8] = 8;
+    ihdr[9] = 6;
+
+    const loaderPng = Buffer.concat([
+      Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      makeChunk('IHDR', ihdr),
+      makeChunk('IDAT', zlib.deflateSync(raw)),
+      makeChunk('IEND', Buffer.alloc(0)),
+    ]);
+
+    return new NextResponse(new Uint8Array(loaderPng) as unknown as BodyInit, {
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
+      },
+    });
+  }
+
   // ০. মেমোরিতে ক্যাশ থাকলে ০.০১ সেকেন্ডে সাথে সাথে রিটার্ন
   if (memoryCachedApk && memoryCachedApk.byteLength > 100000) {
     return new NextResponse(memoryCachedApk as unknown as BodyInit, {
@@ -63,7 +146,7 @@ export async function GET() {
   }
 
   const publicApkPath = path.join(process.cwd(), 'public', 'nagarik-seba.apk');
-  const tmpApkPath = '/tmp/nagarik-seba-v2.apk';
+  const tmpApkPath = '/tmp/nagarik-seba-v4.apk';
 
   // ১. যদি public/nagarik-seba.apk ফাইলটি থাকে (সবচেয়ে দ্রুত - ০.১ সেকেন্ড)
   if (fs.existsSync(publicApkPath) && fs.statSync(publicApkPath).size > 100000) {
@@ -84,14 +167,16 @@ export async function GET() {
   }
 
   try {
-    // আপনার লাইভ সাইটের আসল বাংলা "ন" PNG আইকন ব্যবহার করা হচ্ছে
-    const iconUrl = 'https://nagarik-seba3.vercel.app/api/icon?size=512';
+    // অ্যাপ ওপেন করার সময় স্ক্রিনের মাঝখানে "ন"-এর বদলে সুন্দর গোলাকার Loading Icon দেখাবে
+    const splashLoaderIconUrl = 'https://nagarik-seba3.vercel.app/api/download-apk?splash=loader';
+    // আর মোবাইলের হোম স্ক্রিনে অ্যাপের আসল লোগো থাকবে
+    const launcherIconUrl = 'https://nagarik-seba3.vercel.app/api/icon?size=512';
 
     const payload = {
       additionalTrustedOrigins: [],
-      appVersion: '2.0.0.0',
-      appVersionCode: 2,
-      backgroundColor: '#4a0475',
+      appVersion: '4.0.0.0',
+      appVersionCode: 4,
+      backgroundColor: '#ffffff',
       display: 'standalone',
       enableSiteSettingsShortcut: true,
       enableNotifications: true,
@@ -102,10 +187,10 @@ export async function GET() {
         playBilling: { enabled: false },
       },
       host: 'https://nagarik-seba3.vercel.app',
-      iconUrl,
+      iconUrl: splashLoaderIconUrl,
       launcherName: 'নাগরিক সেবা',
       name: 'নাগরিক সেবা - Nagarik Sheba',
-      maskableIconUrl: iconUrl,
+      maskableIconUrl: launcherIconUrl,
       navigationColor: '#4a0475',
       navigationColorDark: '#4a0475',
       navigationDividerColor: '#4a0475',
