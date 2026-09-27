@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { categories } from '@/lib/services'
+import { categories, services as staticServices } from '@/lib/services'
 import { Search, Loader2, CreditCard, ClipboardList, FileText, ShieldCheck, Headphones, Zap, Trophy, ArrowRight, Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -59,44 +59,45 @@ const whyUs = [
 ]
 
 export default function HomePage() {
-  const [services, setServices] = useState<any[]>([])
+  // ড্যাশবোর্ডের মতো হুবহু @/lib/services থেকে ডাটা নেওয়া হচ্ছে
+  const [services, setServices] = useState<any[]>(staticServices)
   const [stats, setStats] = useState([
-    { icon: '⚡', value: '...', label: 'মোট সেবা সংখ্যা' },
-    { icon: '👥', value: '...', label: 'মোট ব্যবহারকারী' },
+    { icon: '⚡', value: `${staticServices.length}+`, label: 'মোট সেবা সংখ্যা' },
+    { icon: '👥', value: '৩,৩৯,৭১৪', label: 'মোট ব্যবহারকারী' },
     { icon: '👤', value: '৭,৬২৯', label: 'মোট উদ্যোক্তা' },
     { icon: '🏢', value: '৩২৯', label: 'মোট সেন্টার' },
   ])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data: servicesData } = await supabase.from('services').select('*')
-        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+    setServices(staticServices)
 
-        setServices(servicesData || [])
+    async function fetchUserCount() {
+      try {
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+
         setStats(prev => [
-          { ...prev[0], value: `${servicesData?.length || 0}+` },
+          { ...prev[0], value: `${staticServices.length}+` },
           { ...prev[1], value: (Number(count || 0) + 339714).toLocaleString('bn-BD') },
           prev[2],
           prev[3]
         ])
       } catch (err) {
         console.error('Error:', err)
-      } finally {
-        setLoading(false)
       }
     }
-    fetchData()
+    fetchUserCount()
   }, [])
 
   const filteredServices = services.filter(s => {
     const matchCat = activeCategory === 'all' || s.category === activeCategory
     const matchSearch =
       s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.title_en && s.title_en.toLowerCase().includes(searchQuery.toLowerCase()))
+      ((s.titleEn || s.title_en) && (s.titleEn || s.title_en).toLowerCase().includes(searchQuery.toLowerCase()))
     return matchCat && matchSearch
   })
 
@@ -129,7 +130,6 @@ export default function HomePage() {
               <ArrowRight size={20} />
             </Link>
 
-            {/* পপআপ ছাড়া সরাসরি ১-ক্লিকে ডিরেক্ট APK ডাউনলোড বাটন */}
             <a
               href="/api/download-apk"
               download="Nagarik-Sheba.apk"
@@ -138,7 +138,6 @@ export default function HomePage() {
               <Download size={20} className="text-[#f97316]" />
               <span>সরাসরি APK ডাউনলোড করুন</span>
             </a>
-
           </div>
         </div>
 
@@ -211,7 +210,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── ALL SERVICES ── */}
+      {/* ── ALL SERVICES (ড্যাশবোর্ডের সাথে ১০০% সিঙ্ক) ── */}
       <section className="py-12 max-w-6xl mx-auto px-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-800">সকল সেবাসমূহ</h2>
@@ -227,6 +226,27 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* ক্যাটাগরি ফিল্টার বাটনসমূহ */}
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar">
+          {categories.map(cat => {
+            const isActive = activeCategory === cat.id
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer border ${
+                  isActive
+                    ? 'bg-[#7c3aed] text-white border-[#7c3aed] shadow-md'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300 hover:text-purple-700'
+                }`}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
@@ -237,8 +257,13 @@ export default function HomePage() {
               <Link
                 key={s.id}
                 href="/dashboard"
-                className="bg-emerald-50 rounded-2xl p-5 text-center border border-emerald-100 shadow-sm hover:shadow-md transition group"
+                className="relative bg-emerald-50 rounded-2xl p-5 text-center border border-emerald-100 shadow-sm hover:shadow-md transition group"
               >
+                {s.deliveryTime && (
+                  <div className="absolute top-2.5 right-2.5 bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-200">
+                    ⏱ {s.deliveryTime}
+                  </div>
+                )}
                 <div className={`w-14 h-14 ${s.color || 'bg-purple-100'} rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-sm group-hover:scale-110 transition-transform`}>
                   {s.icon}
                 </div>
