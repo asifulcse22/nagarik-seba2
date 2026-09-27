@@ -3,36 +3,104 @@
 import React, { useEffect, useState } from 'react';
 
 export default function MobileAppInstall() {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showIOSModal, setShowIOSModal] = useState(false);
+  const [isStandaloneApp, setIsStandaloneApp] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
+
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true ||
+      document.referrer.includes('android-app://');
+    setIsStandaloneApp(isStandalone);
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+
+    const timer = setTimeout(() => {
+      fetch('/api/download-apk?v=2', { cache: 'force-cache' }).catch(() => {});
+    }, 800);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      clearTimeout(timer);
+    };
   }, []);
+
+  const handleFastAndroidInstall = async () => {
+    if (deferredPrompt) {
+      setIsInstalling(true);
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      setIsInstalling(false);
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        return;
+      }
+    }
+    const link = document.createElement('a');
+    link.href = '/api/download-apk?v=2';
+    link.download = 'Nagarik-Sheba.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <>
-      <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2">
-        {/* ১. Android: ক্লিক করলেই সরাসরি আসল ৮৭৬ KB Signed .APK ডাউনলোড হবে */}
-        <a
-          href="/api/download-apk"
-          download="Nagarik-Sheba.apk"
-          className="flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-xl hover:scale-105 transition-transform cursor-pointer border border-white/20"
-        >
-          <span>🤖 Android APK ডাউনলোড</span>
-        </a>
+      <style jsx global>{`
+        @media (max-width: 640px) {
+          nav a[href="/"] {
+            flex-shrink: 0 !important;
+            gap: 8px !important;
+          }
+          nav a[href="/"] span {
+            white-space: nowrap !important;
+          }
+          nav a[href="/"] span:first-child {
+            font-size: 15px !important;
+            line-height: 1.2 !important;
+          }
+          nav a[href="/"] span:last-child {
+            font-size: 9px !important;
+            display: block !important;
+          }
+          nav a[href*="wa.me"],
+          nav a[href="/dashboard"] {
+            white-space: nowrap !important;
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+          }
+        }
+      `}</style>
 
-        {/* ২. iOS (iPhone) বাটন */}
-        <button
-          onClick={() => setShowIOSModal(true)}
-          className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-xl hover:scale-105 transition-transform cursor-pointer border border-white/20"
-        >
-          <span>🍎 iPhone (iOS) অ্যাপ</span>
-        </button>
-      </div>
+      {!isStandaloneApp && (
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+          <button
+            onClick={handleFastAndroidInstall}
+            disabled={isInstalling}
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xl hover:scale-105 transition-transform cursor-pointer border border-white/20 whitespace-nowrap"
+          >
+            <span>🤖 {isInstalling ? 'ইনস্টল হচ্ছে...' : 'Android APK'}</span>
+          </button>
 
-      {/* iPhone (iOS) ইনস্টল গাইড */}
+          <button
+            onClick={() => setShowIOSModal(true)}
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xl hover:scale-105 transition-transform cursor-pointer border border-white/20 whitespace-nowrap"
+          >
+            <span>🍎 iPhone অ্যাপ</span>
+          </button>
+        </div>
+      )}
+
       {showIOSModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
