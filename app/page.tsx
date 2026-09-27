@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { categories } from '@/lib/services'
-import { Search, Loader2, CreditCard, ClipboardList, FileText, ShieldCheck, Headphones, Zap, Trophy, ArrowRight } from 'lucide-react'
+import { Search, Loader2, CreditCard, ClipboardList, FileText, ShieldCheck, Headphones, Zap, Trophy, ArrowRight, Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const coreServices = [
@@ -101,7 +101,7 @@ export default function HomePage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans">
+    <div className="min-h-screen bg-[#f8fafc]">
       <Navbar />
 
       {/* ── HERO ── */}
@@ -128,6 +128,17 @@ export default function HomePage() {
               <span>সরাসরি ড্যাশবোর্ডে প্রবেশ করুন</span>
               <ArrowRight size={20} />
             </Link>
+
+            {/* পপআপ ছাড়া সরাসরি ১-ক্লিকে ডিরেক্ট APK ডাউনলোড বাটন */}
+            <a
+              href="/api/download-apk"
+              download="Nagarik-Sheba.apk"
+              className="inline-flex items-center gap-2 px-7 py-3.5 sm:px-8 sm:py-4 bg-white text-[#6d28d9] font-black rounded-full text-base sm:text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer"
+            >
+              <Download size={20} className="text-[#f97316]" />
+              <span>সরাসরি APK ডাউনলোড করুন</span>
+            </a>
+
           </div>
         </div>
 

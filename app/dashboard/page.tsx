@@ -398,7 +398,7 @@ export default function DashboardPage() {
   const userInitial = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="min-h-screen flex bg-[#f3f0ff] font-sans antialiased relative">
+    <div className="min-h-screen flex bg-[#f3f0ff]  antialiased relative">
 
       {/* 🔔 নোটিফিকেশন টোস্ট */}
       {toast && toast.show && (
