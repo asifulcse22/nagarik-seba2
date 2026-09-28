@@ -24,7 +24,7 @@ export default function BalancePage() {
     }, [])
 
     const paymentNumbers = {
-        bKash: '01600217502',
+        bKash: '01623364830',
         Nagad: '01349739103',
     }
 
