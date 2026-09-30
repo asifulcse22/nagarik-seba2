@@ -3,35 +3,47 @@ import { useState, useEffect } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { categories, services as staticServices } from '@/lib/services'
-import { Search, Loader2 } from 'lucide-react'
+import { Search } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+const SERVICES_CACHE_KEY = 'nagarik_services_cache_v1'
+
 export default function ServicesPage() {
-  const [services, setServices] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  // ⚡ শুরু থেকেই staticServices দেখানো হবে, তাই নেট স্লো থাকলেও ০ সেকেন্ডে পেজ ওপেন হবে
+  const [services, setServices] = useState<any[]>(staticServices)
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    async function fetchServices() {
+    // ১. প্রথমে লোকাল ক্যাশ থেকে চেক করা (যদি আগে কখনো লোড হয়ে থাকে)
+    try {
+      const cached = localStorage.getItem(SERVICES_CACHE_KEY)
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setServices(parsed)
+        }
+      }
+    } catch (e) {}
+
+    // ২. ব্যাকগ্রাউন্ডে নীরবে ডাটাবেস থেকে আপডেট আনা (ইউজারকে লোডিং না দেখিয়ে)
+    async function syncServicesInBackground() {
       try {
         const { data, error } = await supabase
           .from('services')
           .select('*')
           .order('created_at', { ascending: true })
 
-        if (error) throw error
+        if (error || !data) return
         
-        // Map snake_case from DB to camelCase for frontend
-        const mappedData = (data || []).map(s => ({
+        const mappedData = data.map(s => ({
           ...s,
           titleEn: s.title_en,
           inputLabel: s.input_label,
           inputPlaceholder: s.input_placeholder
         }))
 
-        // ডাটাবেসে যে সার্ভিসগুলো এখনো নেই (যেমন নতুন ১২টি ভূমি সেবা), সেগুলো staticServices থেকে যুক্ত করা
         const existingIds = new Set(mappedData.map((s: any) => s.id))
         const existingTitles = new Set(mappedData.map((s: any) => s.title))
         const merged = [
@@ -40,15 +52,13 @@ export default function ServicesPage() {
         ]
         
         setServices(merged)
+        localStorage.setItem(SERVICES_CACHE_KEY, JSON.stringify(merged))
       } catch (err) {
-        console.error('Error fetching services:', err)
-        setServices(staticServices)
-      } finally {
-        setLoading(false)
+        // স্লো নেট বা অফলাইন থাকলে staticServices-ই চলতে থাকবে
       }
     }
 
-    fetchServices()
+    syncServicesInBackground()
   }, [])
 
   const filteredServices = services.filter(s => {
@@ -92,38 +102,32 @@ export default function ServicesPage() {
           ))}
         </div>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-            <Loader2 className="w-10 h-10 animate-spin mb-2 text-violet-600" />
-            <p>সেবা লোড হচ্ছে...</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredServices.map(s => (
-              <Link 
-                key={s.id} 
-                href="/auth/register" 
-                className="bg-white rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 hover:shadow-[0_15px_40px_rgba(124,58,237,0.2)] hover:bg-gradient-to-br hover:from-violet-50 hover:to-fuchsia-50 hover:border-violet-200 hover:-translate-y-1.5 transition-all duration-300 service-card group relative overflow-hidden"
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 ${s.color} rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                    {s.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-800 text-sm">{s.title}</h3>
-                    <p className="text-xs text-gray-400 mt-0.5">{s.titleEn}</p>
-                    <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2">{s.description}</p>
-                  </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredServices.map(s => (
+            <Link 
+              key={s.id} 
+              href="/dashboard" 
+              prefetch={true}
+              className="bg-white rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 hover:shadow-[0_15px_40px_rgba(124,58,237,0.2)] hover:bg-gradient-to-br hover:from-violet-50 hover:to-fuchsia-50 hover:border-violet-200 hover:-translate-y-1.5 transition-all duration-300 service-card group relative overflow-hidden"
+            >
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 ${s.color} rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                  {s.icon}
                 </div>
-                {s.popular && (
-                  <div className="mt-3 inline-flex items-center gap-1 bg-yellow-50 text-yellow-600 text-xs px-2 py-1 rounded-full">
-                    ⭐ জনপ্রিয়
-                  </div>
-                )}
-              </Link>
-            ))}
-          </div>
-        )}
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-800 text-sm">{s.title}</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">{s.titleEn}</p>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2">{s.description}</p>
+                </div>
+              </div>
+              {s.popular && (
+                <div className="mt-3 inline-flex items-center gap-1 bg-yellow-50 text-yellow-600 text-xs px-2 py-1 rounded-full">
+                  ⭐ জনপ্রিয়
+                </div>
+              )}
+            </Link>
+          ))}
+        </div>
       </div>
       <Footer />
     </div>

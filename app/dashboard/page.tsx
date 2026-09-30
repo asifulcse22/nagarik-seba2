@@ -22,10 +22,15 @@ export default function DashboardPage() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   
-  // ইউজার ও প্রোফাইল স্টেট
-  const [profile, setProfile] = useState<Profile | null>(null)
+  // ⚡ ইউজার ও প্রোফাইল স্টেট (শুরু থেকেই loading = false, তাই স্লো নেটেও ০ সেকেন্ডে ওপেন হবে)
+  const [profile, setProfile] = useState<Profile | null>({
+    id: 'guest_user',
+    full_name: 'প্রিয় নাগরিক',
+    balance: 0,
+    role: 'citizen'
+  } as any)
   const [isRegistered, setIsRegistered] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   // রেজিস্ট্রেশন ও লগইন মোডাল
   const [authModalOpen, setAuthModalOpen] = useState(false)
@@ -87,36 +92,56 @@ export default function DashboardPage() {
   // টোস্ট নোটিফিকেশন
   const [toast, setToast] = useState<{ title: string; message: string; show: boolean; actionBtn?: string; actionType?: 'recharge' | 'auth' } | null>(null)
 
+  // ⚡ স্লো নেটেও সাথে সাথে ড্যাশবোর্ড ওপেন হওয়ার useEffect
   useEffect(() => {
-    const initDashboard = async () => {
-      setServices(staticServices)
+    setServices(staticServices)
 
-      const savedUser = typeof window !== 'undefined' ? localStorage.getItem('bd_portal_user') : null
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (session) {
-        const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-        const userFullName = profileData?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'প্রিয় নাগরিক'
-        setProfile({ ...profileData, full_name: userFullName })
-        setIsRegistered(true)
-      } else if (savedUser) {
-        try {
-          const parsed = JSON.parse(savedUser)
-          setProfile(parsed)
-          setIsRegistered(Boolean(parsed.phone || parsed.full_name !== 'প্রিয় নাগরিক'))
-        } catch (e) {
-          setProfile({ id: 'guest_user', full_name: 'প্রিয় নাগরিক', balance: 0, role: 'citizen' } as any)
-          setIsRegistered(false)
-        }
-      } else {
+    // ধাপ ১: সাথে সাথে (০ সেকেন্ডে) লোকাল স্টোরেজ থেকে ইউজারের নাম ও ব্যালেন্স লোড করা
+    const savedUser = typeof window !== 'undefined' ? localStorage.getItem('bd_portal_user') : null
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser)
+        setProfile(parsed)
+        setIsRegistered(Boolean(parsed.phone || parsed.full_name !== 'প্রিয় নাগরিক'))
+      } catch (e) {
         setProfile({ id: 'guest_user', full_name: 'প্রিয় নাগরিক', balance: 0, role: 'citizen' } as any)
         setIsRegistered(false)
       }
-
-      setLoading(false)
+    } else {
+      setProfile({ id: 'guest_user', full_name: 'প্রিয় নাগরিক', balance: 0, role: 'citizen' } as any)
+      setIsRegistered(false)
     }
 
-    initDashboard()
+    setLoading(false)
+
+    // ধাপ ২: ব্যাকগ্রাউন্ডে নীরবে Supabase থেকে লেটেস্ট ব্যালেন্স চেক করা (ইউজার আটকে থাকবে না)
+    const syncSessionInBackground = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+
+          const userFullName =
+            profileData?.full_name ||
+            session.user.user_metadata?.full_name ||
+            session.user.email?.split('@')[0] ||
+            'প্রিয় নাগরিক'
+
+          const updatedProfile = { ...profileData, full_name: userFullName }
+          setProfile(updatedProfile)
+          setIsRegistered(true)
+          localStorage.setItem('bd_portal_user', JSON.stringify(updatedProfile))
+        }
+      } catch (err) {
+        // নেট স্লো থাকলে লোকাল স্টোরেজের ডাটাই বজায় থাকবে
+      }
+    }
+
+    syncSessionInBackground()
   }, [])
 
   const triggerToast = (title: string, message: string, actionBtn?: string, actionType?: 'recharge' | 'auth') => {
@@ -180,7 +205,6 @@ export default function DashboardPage() {
 
     setNewNidFiles({})
 
-    // যদি ভূমি সেবা বা মাল্টি-ফিল্ড সার্ভিস হয় তবে ডিফল্ট মান সেট করা
     if (service.fields && Array.isArray(service.fields)) {
       const initialValues: Record<string, string> = {}
       service.fields.forEach((f: LandFormField) => {
@@ -195,7 +219,7 @@ export default function DashboardPage() {
     }
   }
 
-  // ছবি আপলোড হ্যান্ডলার (আইডি কার্ড / জন্ম নিবন্ধন)
+  // ছবি আপলোড হ্যান্ডলার
   const handleFileUpload = (type: 'nidImage' | 'birthImage', e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -292,12 +316,11 @@ export default function DashboardPage() {
     }
   }
 
-  // সেবা অর্ডার সাবমিট (ভূমি সেবা, নতুন আইডি কার্ড, সংশোধন, নতুন জন্মনিবন্ধন ও অন্যান্য)
+  // সেবা অর্ডার সাবমিট
   const handlePlaceOrder = async (service: any) => {
     let payload = ''
 
     if (service.fields && Array.isArray(service.fields)) {
-      // 🏡 ভূমি সেবার অফিসিয়াল ফিল্ড ভ্যালিডেশন
       for (const field of service.fields as LandFormField[]) {
         if (field.required) {
           if (field.type === 'file') {
@@ -443,17 +466,6 @@ export default function DashboardPage() {
     return matchCat && matchSearch
   })
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f0edff]">
-        <div className="text-center">
-          <div className="w-14 h-14 mx-auto mb-4 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-[#7c3aed] font-bold">ড্যাশবোর্ড লোড হচ্ছে...</p>
-        </div>
-      </div>
-    )
-  }
-
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'ড্যাশবোর্ড' },
     { href: '/dashboard/profile', icon: User, label: 'প্রোফাইল' },
@@ -467,7 +479,7 @@ export default function DashboardPage() {
   const userInitial = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="min-h-screen flex bg-[#f3f0ff]  antialiased relative">
+    <div className="min-h-screen flex bg-[#f3f0ff] antialiased relative">
 
       {/* 🔔 নোটিফিকেশন টোস্ট */}
       {toast && toast.show && (
@@ -621,7 +633,6 @@ export default function DashboardPage() {
                 </button>
               </form>
 
-              {/* হোমপেজে ফিরে যাওয়ার বাটন */}
               <div className="mt-4 pt-3.5 border-t border-slate-100 text-center">
                 <button
                   type="button"
@@ -631,7 +642,6 @@ export default function DashboardPage() {
                   <ArrowLeft size={14} /> এখন রেজিস্ট্রেশন করতে চাই না, হোমপেজে ফিরে যান
                 </button>
               </div>
-
             </div>
           </div>
         </div>
@@ -765,7 +775,6 @@ export default function DashboardPage() {
               <span>WhatsApp এ মেসেজ দিন</span>
             </a>
 
-            {/* ইউজার প্রোফাইল হেডার */}
             <div className="flex items-center gap-2">
               <div className="hidden sm:block text-right">
                 <p className="text-xs font-black text-slate-800 leading-tight">
@@ -812,7 +821,8 @@ export default function DashboardPage() {
           </div>
 
           {/* ক্যাটাগরি বাটনসমূহ */}
-          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {/*<div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar"> */}
+             <div className="flex flex-wrap gap-2">
             {categories.map(cat => {
               const isActive = activeCategory === cat.id
               return (
@@ -843,7 +853,6 @@ export default function DashboardPage() {
                   onClick={() => handleServiceClick(service)}
                   className="bg-white hover:bg-gradient-to-br hover:from-white hover:to-purple-50/40 rounded-3xl p-5 flex flex-col items-center text-center border border-purple-100/70 shadow-sm hover:shadow-lg hover:border-purple-300 hover:-translate-y-1 transition group cursor-pointer relative"
                 >
-                  {/* ডেলিভারি সময় ব্যাজ */}
                   {service.deliveryTime && (
                     <div className="absolute top-3 right-3 bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-200">
                       ⏱ {service.deliveryTime}

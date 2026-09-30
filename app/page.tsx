@@ -227,7 +227,8 @@ export default function HomePage() {
         </div>
 
         {/* ক্যাটাগরি ফিল্টার বাটনসমূহ */}
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar">
+        {/*<div className="flex gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar"> */}
+           <div className="flex flex-wrap gap-3 mb-4">
           {categories.map(cat => {
             const isActive = activeCategory === cat.id
             return (
