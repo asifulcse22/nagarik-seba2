@@ -11,6 +11,7 @@ import {
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/supabase'
 import { categories, services as staticServices } from '@/lib/services'
+import type { LandFormField } from '@/lib/services'
 
 const WHATSAPP_LINK = "https://wa.me/message/UHAWF6Q5VKZ5I1"
 
@@ -76,6 +77,10 @@ export default function DashboardPage() {
     permanentAddress: '',
     guardianPhone: ''
   })
+
+  // 🏡 ভূমি সেবার অফিসিয়াল ডাইনামিক ফর্ম ও ফাইল স্টেট
+  const [landFormValues, setLandFormValues] = useState<Record<string, string>>({})
+  const [landFormFiles, setLandFormFiles] = useState<Record<string, string>>({})
 
   const [submitting, setSubmitting] = useState(false)
 
@@ -174,6 +179,20 @@ export default function DashboardPage() {
     })
 
     setNewNidFiles({})
+
+    // যদি ভূমি সেবা বা মাল্টি-ফিল্ড সার্ভিস হয় তবে ডিফল্ট মান সেট করা
+    if (service.fields && Array.isArray(service.fields)) {
+      const initialValues: Record<string, string> = {}
+      service.fields.forEach((f: LandFormField) => {
+        if (f.type === 'select' && f.options && f.options.length > 0) {
+          initialValues[f.name] = f.options[0]
+        } else {
+          initialValues[f.name] = ''
+        }
+      })
+      setLandFormValues(initialValues)
+      setLandFormFiles({})
+    }
   }
 
   // ছবি আপলোড হ্যান্ডলার (আইডি কার্ড / জন্ম নিবন্ধন)
@@ -187,17 +206,33 @@ export default function DashboardPage() {
     }
   }
 
+  // 🏡 ভূমি সেবার ফাইল আপলোড হ্যান্ডলার
+  const handleLandFileUpload = (fieldName: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setLandFormFiles(prev => ({
+        ...prev,
+        [fieldName]: file.name
+      }))
+    }
+  }
+
   // সার্ভিস টাইপ চেক
-  const isCorrectionService = activeService?.id?.includes('correction') || 
+  const isLandOfficialService = Boolean(activeService?.fields && Array.isArray(activeService.fields))
+
+  const isCorrectionService = !isLandOfficialService && (
+                              activeService?.id?.includes('correction') || 
                               activeService?.id?.includes('transfer') || 
                               activeService?.title?.includes('সংশোধন') ||
-                              activeService?.title?.includes('স্থানান্তর')
+                              activeService?.title?.includes('স্থানান্তর'))
 
-  const isNewBirthService = activeService?.id === 'new-birth-reg' || 
-                            activeService?.title?.includes('নতুন জন্মনিবন্ধন')
+  const isNewBirthService = !isLandOfficialService && (
+                            activeService?.id === 'new-birth-reg' || 
+                            activeService?.title?.includes('নতুন জন্মনিবন্ধন'))
 
-  const isNewIdCardService = activeService?.id === 'new-id-card' || 
-                             activeService?.title?.includes('নতুন আইডি কার্ড')
+  const isNewIdCardService = !isLandOfficialService && (
+                             activeService?.id === 'new-id-card' || 
+                             activeService?.title?.includes('নতুন আইডি কার্ড'))
 
   // 🔐 ডাইনামিক রেজিস্ট্রেশন ও লগইন
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -257,11 +292,41 @@ export default function DashboardPage() {
     }
   }
 
-  // সেবা অর্ডার সাবমিট (নতুন আইডি কার্ড, সংশোধন, নতুন জন্মনিবন্ধন ও অন্যান্য)
+  // সেবা অর্ডার সাবমিট (ভূমি সেবা, নতুন আইডি কার্ড, সংশোধন, নতুন জন্মনিবন্ধন ও অন্যান্য)
   const handlePlaceOrder = async (service: any) => {
     let payload = ''
 
-    if (isNewIdCardService) {
+    if (service.fields && Array.isArray(service.fields)) {
+      // 🏡 ভূমি সেবার অফিসিয়াল ফিল্ড ভ্যালিডেশন
+      for (const field of service.fields as LandFormField[]) {
+        if (field.required) {
+          if (field.type === 'file') {
+            if (!landFormFiles[field.name]) {
+              return alert(`অনুগ্রহ করে "${field.label}" আপলোড করুন!`)
+            }
+          } else {
+            if (!landFormValues[field.name] || !landFormValues[field.name].trim()) {
+              return alert(`অনুগ্রহ করে "${field.label}" পূরণ করুন!`)
+            }
+          }
+        }
+      }
+
+      const formattedData: Record<string, string> = {
+        service_category: '🏡 ভূমি সেবা',
+        service_name: service.title
+      }
+
+      ;(service.fields as LandFormField[]).forEach(field => {
+        if (field.type === 'file') {
+          formattedData[field.label] = landFormFiles[field.name] || 'দেওয়া হয়নি'
+        } else {
+          formattedData[field.label] = (landFormValues[field.name] || '').trim() || 'দেওয়া হয়নি'
+        }
+      })
+
+      payload = JSON.stringify(formattedData)
+    } else if (isNewIdCardService) {
       if (!newNidForm.applicantName.trim()) return alert('অনুগ্রহ করে আবেদনকারীর পূর্ণ নাম দিন!')
       if (!newNidForm.birthRegistration.trim()) return alert('অনুগ্রহ করে জন্ম নিবন্ধন সনদের তথ্য দিন!')
       if (!newNidForm.fatherNid.trim()) return alert('অনুগ্রহ করে বাবার NID-এর তথ্য দিন!')
@@ -335,7 +400,9 @@ export default function DashboardPage() {
     if (rpcError || (data && !data.success)) {
       alert(rpcError?.message || data?.message || 'অর্ডার করতে সমস্যা হয়েছে।')
     } else {
-      if (isNewIdCardService) {
+      if (isLandOfficialService) {
+        alert(`✅ আপনার "${service.title}" আবেদন সফলভাবে জমা হয়েছে!`)
+      } else if (isNewIdCardService) {
         alert('✅ আপনার নতুন আইডি কার্ডের আবেদন সফলভাবে জমা হয়েছে!')
       } else if (isNewBirthService) {
         alert('✅ আপনার নতুন জন্মনিবন্ধন আবেদন সফলভাবে জমা হয়েছে! ২৪ ঘণ্টার মধ্যেই অনলাইন হয়ে যাবে।')
@@ -349,6 +416,8 @@ export default function DashboardPage() {
       setOrderInput('')
       setCorrectionDetails('')
       setUploadedFiles({})
+      setLandFormValues({})
+      setLandFormFiles({})
       setProfile(prev => {
         const updated = prev ? { ...prev, balance: (prev.balance || 0) - service.price } : null
         if (updated) localStorage.setItem('bd_portal_user', JSON.stringify(updated))
@@ -756,7 +825,7 @@ export default function DashboardPage() {
                       : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300 hover:text-purple-700'
                   }`}
                 >
-                  {cat.label}
+                  {cat.icon} {cat.label}
                 </button>
               )
             })}
@@ -842,8 +911,71 @@ export default function DashboardPage() {
             {/* ফর্ম বডি */}
             <div className="py-4 overflow-y-auto space-y-4">
 
-              {/* 🌟 কেইস ১: নতুন আইডি কার্ড ফর্ম */}
-              {isNewIdCardService ? (
+              {/* 🌟 কেইস ০: 🏡 ভূমি সেবার ১২টি অফিসিয়াল ফর্ম */}
+              {isLandOfficialService ? (
+                <div className="space-y-3.5">
+                  <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl flex items-start gap-2.5 text-emerald-900">
+                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h5 className="text-xs font-black">সরকারি অফিসিয়াল ফরম্যাট ({activeService.title})</h5>
+                      <p className="text-[10px] text-emerald-700 font-semibold mt-0.5">
+                        {activeService.officialNote || 'নিচের প্রয়োজনীয় তথ্যগুলো সঠিকভাবে পূরণ করে আবেদন জমা দিন।'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {(activeService.fields as LandFormField[]).map((field) => (
+                    <div key={field.name}>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {field.label} {field.required && <span className="text-red-500">*</span>}
+                      </label>
+
+                      {field.type === 'select' ? (
+                        <select
+                          value={landFormValues[field.name] || ''}
+                          onChange={e => setLandFormValues(prev => ({ ...prev, [field.name]: e.target.value }))}
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800"
+                        >
+                          {field.options?.map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : field.type === 'textarea' ? (
+                        <textarea
+                          rows={2}
+                          value={landFormValues[field.name] || ''}
+                          onChange={e => setLandFormValues(prev => ({ ...prev, [field.name]: e.target.value }))}
+                          placeholder={field.placeholder || ''}
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800 resize-none"
+                        />
+                      ) : field.type === 'file' ? (
+                        <label className="flex flex-col items-center justify-center p-3.5 border-2 border-dashed border-purple-300 rounded-xl bg-purple-50/30 hover:bg-purple-50/70 transition cursor-pointer text-center">
+                          <Upload size={18} className="text-purple-600 mb-1" />
+                          <span className="text-[11px] font-bold text-slate-700">{field.label}</span>
+                          <span className="text-[10px] text-purple-600 font-semibold mt-0.5">
+                            {landFormFiles[field.name] ? `✅ ${landFormFiles[field.name]}` : 'ফাইল / ছবি সিলেক্ট করুন (PDF/Image)'}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            className="hidden"
+                            onChange={e => handleLandFileUpload(field.name, e)}
+                          />
+                        </label>
+                      ) : (
+                        <input
+                          type="text"
+                          value={landFormValues[field.name] || ''}
+                          onChange={e => setLandFormValues(prev => ({ ...prev, [field.name]: e.target.value }))}
+                          placeholder={field.placeholder || ''}
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white text-xs sm:text-sm font-semibold text-slate-800"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : isNewIdCardService ? (
+                /* 🌟 কেইস ১: নতুন আইডি কার্ড ফর্ম */
                 <div className="space-y-4">
                   <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl flex items-start gap-2.5 text-blue-800">
                     <CheckCircle2 size={18} className="text-blue-600 shrink-0 mt-0.5" />
@@ -1015,11 +1147,9 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-              ) : (
+              ) : isNewBirthService ? (
                 /* 🌟 কেইস ২: নতুন জন্মনিবন্ধন ফর্ম */
-                isNewBirthService ? (
                 <div className="space-y-3.5">
-                  {/* বিশেষ গ্যারান্টি ব্যানার */}
                   <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl flex items-center gap-2.5 text-emerald-800">
                     <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
                     <div>
@@ -1028,7 +1158,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* ১. বাচ্চার নাম */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
                       বাচ্চার নাম (বাংলা ও ইংরেজি) <span className="text-red-500">*</span>
@@ -1044,7 +1173,6 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* ২. মাতার NID / জন্মনিবন্ধন */}
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
                         মাতার NID / জন্মনিবন্ধন নম্বর <span className="text-red-500">*</span>
@@ -1059,7 +1187,6 @@ export default function DashboardPage() {
                       />
                     </div>
 
-                    {/* ৩. পিতার NID / জন্মনিবন্ধন */}
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
                         পিতার NID / জন্মনিবন্ধন নম্বর <span className="text-red-500">*</span>
@@ -1075,7 +1202,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* ৪. জন্মতারিখ, সময় ও স্থান */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
                       জন্মতারিখ, সময় ও স্থান <span className="text-red-500">*</span>
@@ -1090,7 +1216,6 @@ export default function DashboardPage() {
                     />
                   </div>
 
-                  {/* ৫. স্থায়ী ঠিকানা */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
                       স্থায়ী ঠিকানা <span className="text-red-500">*</span>
@@ -1105,7 +1230,6 @@ export default function DashboardPage() {
                     />
                   </div>
 
-                  {/* ৬. অভিভাবকের ফোন নম্বর */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
                       অভিভাবকের ফোন নম্বর <span className="text-red-500">*</span>
@@ -1189,7 +1313,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                /* 🌟 কেইস ৩: অন্যান্য সাধারণ সেবা */
+                /* 🌟 কেইস ৪: অন্যান্য সাধারণ সেবা */
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">
                     {activeService.inputLabel || 'প্রয়োজনীয় তথ্য (NID / ফরম নম্বর)'}
@@ -1203,7 +1327,7 @@ export default function DashboardPage() {
                     autoFocus
                   />
                 </div>
-              ))}
+              )}
 
             </div>
 
@@ -1222,7 +1346,7 @@ export default function DashboardPage() {
                 disabled={submitting} 
                 className="flex-1 py-3 bg-[#7c3aed] hover:bg-purple-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg text-xs sm:text-sm transition cursor-pointer disabled:opacity-50"
               >
-                {submitting ? 'লোড হচ্ছে...' : <><Send size={15} /><span>{(isNewBirthService || isNewIdCardService) ? 'আবেদন জমা দিন' : 'অর্ডার কনফার্ম করুন'}</span></>}
+                {submitting ? 'লোড হচ্ছে...' : <><Send size={15} /><span>{(isNewBirthService || isNewIdCardService || isLandOfficialService) ? 'আবেদন জমা দিন' : 'অর্ডার কনফার্ম করুন'}</span></>}
               </button>
             </div>
 

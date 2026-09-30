@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { categories } from '@/lib/services'
+import { categories, services as staticServices } from '@/lib/services'
 import { Search, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -24,16 +24,25 @@ export default function ServicesPage() {
         if (error) throw error
         
         // Map snake_case from DB to camelCase for frontend
-        const mappedData = data.map(s => ({
+        const mappedData = (data || []).map(s => ({
           ...s,
           titleEn: s.title_en,
           inputLabel: s.input_label,
           inputPlaceholder: s.input_placeholder
         }))
+
+        // ডাটাবেসে যে সার্ভিসগুলো এখনো নেই (যেমন নতুন ১২টি ভূমি সেবা), সেগুলো staticServices থেকে যুক্ত করা
+        const existingIds = new Set(mappedData.map((s: any) => s.id))
+        const existingTitles = new Set(mappedData.map((s: any) => s.title))
+        const merged = [
+          ...mappedData,
+          ...staticServices.filter(s => !existingIds.has(s.id) && !existingTitles.has(s.title))
+        ]
         
-        setServices(mappedData)
+        setServices(merged)
       } catch (err) {
         console.error('Error fetching services:', err)
+        setServices(staticServices)
       } finally {
         setLoading(false)
       }

@@ -1,3 +1,12 @@
+export interface LandFormField {
+  name: string
+  label: string
+  type: 'text' | 'select' | 'textarea' | 'file'
+  placeholder?: string
+  required: boolean
+  options?: string[]
+}
+
 export interface Service {
   id: string
   title: string
@@ -11,6 +20,8 @@ export interface Service {
   deliveryTime?: string
   inputLabel?: string
   inputPlaceholder?: string
+  officialNote?: string
+  fields?: LandFormField[]
 }
 
 export const services: Service[] = [
@@ -150,8 +161,7 @@ export const services: Service[] = [
     inputPlaceholder: 'NID নম্বর / নতুন জেলা, উপজেলা, ইউনিয়ন/ওয়ার্ড, গ্রাম' 
   },
 
-
-    { 
+  { 
     id: 'new-id-card', 
     title: 'নতুন আইডি কার্ড', 
     titleEn: 'New ID Card', 
@@ -234,7 +244,6 @@ export const services: Service[] = [
   // ─────────────────────────────────────────────
   // 📋 জন্ম নিবন্ধন
   // ─────────────────────────────────────────────
-  // 🔥 নতুন জন্মনিবন্ধন (২৪ ঘণ্টার মধ্যেই অনলাইন হবে):
   { 
     id: 'new-birth-reg', 
     title: 'নতুন জন্মনিবন্ধন', 
@@ -294,12 +303,261 @@ export const services: Service[] = [
   { id: 'vat-reg', title: 'VAT রেজিস্ট্রেশন', titleEn: 'VAT Registration', description: 'ভ্যাট নিবন্ধন ও সনদ', icon: '🧾', color: 'bg-amber-600', category: 'trade', price: 400, inputLabel: 'TIN নাম্বার ও ব্যবসার নাম', inputPlaceholder: 'TIN নাম্বার / ব্যবসার নাম দিন' },
 
   // ─────────────────────────────────────────────
-  // 🏡 ভূমি সেবা
+  // 🏡 ভূমি সেবা (১২টি অফিসিয়াল সেবা ও ফর্ম)
   // ─────────────────────────────────────────────
-  { id: 'land-service', title: 'ভূমি সেবা', titleEn: 'Land Service', description: 'খতিয়ান ও দাগের তথ্য যাচাই', icon: '🏡', color: 'bg-lime-700', category: 'land', price: 100, popular: true, inputLabel: 'দাগ নাম্বার ও মৌজা', inputPlaceholder: 'দাগ নাম্বার / মৌজা / জেলা দিন' },
-  { id: 'land-mutation', title: 'নামজারি আবেদন', titleEn: 'Land Mutation', description: 'জমির নামজারি আবেদন প্রক্রিয়া', icon: '🗂️', color: 'bg-lime-600', category: 'land', price: 250, inputLabel: 'দাগ নাম্বার ও মালিকের নাম', inputPlaceholder: 'দাগ নাম্বার / মালিকের নাম / জেলা' },
-  { id: 'land-record', title: 'জমির রেকর্ড', titleEn: 'Land Record', description: 'RS/BS/SA খতিয়ান ডাউনলোড', icon: '📑', color: 'bg-lime-800', category: 'land', price: 150, inputLabel: 'খতিয়ান নাম্বার ও জেলা', inputPlaceholder: 'খতিয়ান নাম্বার / জেলা / উপজেলা দিন' },
-  { id: 'porcha-copy', title: 'পর্চা কপি', titleEn: 'Porcha Copy', description: 'ডিজিটাল পর্চা কপি সংগ্রহ', icon: '🗃️', color: 'bg-green-900', category: 'land', price: 80, inputLabel: 'দাগ নাম্বার ও মৌজা', inputPlaceholder: 'দাগ নাম্বার / মৌজা দিন' },
+  {
+    id: 'land-mutation-apply',
+    title: 'নামজারি / মিউটেশন আবেদন',
+    titleEn: 'E-Mutation Application',
+    description: 'জমির মালিকানা পরিবর্তন ও অনলাইনে ই-নামজারি আবেদনের সম্পূর্ণ প্রসেসিং সেবা',
+    icon: '🏡',
+    color: 'bg-lime-700',
+    category: 'land',
+    price: 500,
+    popular: true,
+    deliveryTime: '২৪-৪৮ ঘণ্টা',
+    officialNote: 'ই-নামজারি আবেদনের জন্য জমির তফসিল, দলিল, খতিয়ান ও আবেদনকারীর NID তথ্য প্রদান করুন।',
+    fields: [
+      { name: 'division_district_upazila', label: 'বিভাগ, জেলা ও উপজেলা/সার্কেল', type: 'text', placeholder: 'যেমন: ঢাকা, গাজীপুর, সদর', required: true },
+      { name: 'mouza_jl', label: 'মৌজার নাম ও জে.এল (J.L) নম্বর', type: 'text', placeholder: 'মৌজার নাম ও জে.এল নম্বর লিখুন', required: true },
+      { name: 'survey_type', label: 'খতিয়ানের ধরন (Survey Type)', type: 'select', options: ['বিএস (BS)', 'আরএস (RS)', 'এসএ (SA)', 'সিএস (CS)', 'বিআরএস (BRS)', 'নামজারি খতিয়ান'], required: true },
+      { name: 'khatian_no', label: 'খতিয়ান নম্বর', type: 'text', placeholder: 'খতিয়ান নম্বর দিন', required: true },
+      { name: 'dag_no', label: 'দাগ নম্বর', type: 'text', placeholder: 'দাগ নম্বর দিন', required: true },
+      { name: 'land_amount', label: 'আবেদনকৃত জমির পরিমাণ (শতাংশ/অযুতাংশ)', type: 'text', placeholder: 'যেমন: ১০ শতাংশ', required: true },
+      { name: 'ownership_source', label: 'মালিকানা প্রাপ্তির সূত্র', type: 'select', options: ['ক্রয় (সাফ কবলা)', 'ওয়ারিশ (উত্তরাধিকার)', 'হেবা / দানপত্র', 'বণ্টননামা', 'আদালতের ডিক্রি', 'অন্যান্য'], required: true },
+      { name: 'deed_details', label: 'দলিল নম্বর, তারিখ ও সাব-রেজিস্ট্রি অফিস', type: 'text', placeholder: 'দলিল নং, রেজিস্ট্রেশন তারিখ ও অফিসের নাম', required: true },
+      { name: 'applicant_info', label: 'গ্রহীতা/আবেদনকারীর নাম, পিতার নাম ও পূর্ণ ঠিকানা', type: 'textarea', placeholder: 'নাম, পিতা/স্বামীর নাম ও বর্তমান/স্থায়ী ঠিকানা লিখুন', required: true },
+      { name: 'applicant_nid_mobile', label: 'আবেদনকারীর NID নম্বর ও সচল মোবাইল নম্বর', type: 'text', placeholder: 'NID নম্বর এবং মোবাইল নম্বর (01XXXXXXXXX)', required: true },
+      { name: 'seller_or_donor_info', label: 'দাতা / খতিয়ানের রেকর্ডীয় মালিকের নাম ও পিতার নাম', type: 'text', placeholder: 'যার কাছ থেকে জমি প্রাপ্ত তার নাম ও পিতার নাম', required: true },
+      { name: 'deed_khatian_doc', label: 'দলিল ও খতিয়ান/পর্চার স্ক্যান কপি (PDF/ছবি)', type: 'file', required: true },
+      { name: 'nid_photo_doc', label: 'আবেদনকারীর NID, ছবি ও স্বাক্ষর (ওয়ারিশ সনদ থাকলে সহ)', type: 'file', required: true }
+    ]
+  },
+  {
+    id: 'land-khatian-porcha',
+    title: 'খতিয়ান / পর্চা সংগ্রহ',
+    titleEn: 'Khatian / Porcha Collection',
+    description: 'সিএস, এসএ, আরএস, বিএস বা নামজারি খতিয়ান/পর্চার অনলাইন কপি সংগ্রহ',
+    icon: '📜',
+    color: 'bg-lime-600',
+    category: 'land',
+    price: 150,
+    popular: true,
+    deliveryTime: '১-৬ ঘণ্টা',
+    officialNote: 'সিএস, এসএ, আরএস, বিএস বা নামজারি খতিয়ান/পর্চার অনলাইন কপি সংগ্রহের অফিসিয়াল ফর্ম।',
+    fields: [
+      { name: 'division_district', label: 'বিভাগ ও জেলা', type: 'text', placeholder: 'বিভাগ ও জেলার নাম লিখুন', required: true },
+      { name: 'upazila', label: 'উপজেলা / থানা', type: 'text', placeholder: 'উপজেলার নাম লিখুন', required: true },
+      { name: 'mouza_jl', label: 'মৌজার নাম ও জে.এল নম্বর', type: 'text', placeholder: 'মৌজার নাম ও জে.এল নং', required: true },
+      { name: 'survey_type', label: 'জরিপের ধরন (Survey Type)', type: 'select', options: ['আরএস (RS)', 'বিএস (BS)', 'এসএ (SA)', 'সিএস (CS)', 'বিআরএস (BRS)', 'দিয়ারা', 'পেটি', 'নামজারি খতিয়ান'], required: true },
+      { name: 'khatian_no', label: 'খতিয়ান নম্বর', type: 'text', placeholder: 'খতিয়ান নম্বর লিখুন', required: true },
+      { name: 'dag_owner_info', label: 'দাগ নম্বর ও মালিকের নাম (খতিয়ান নং নিশ্চিত না হলে)', type: 'text', placeholder: 'দাগ নম্বর ও মালিকের নাম (ঐচ্ছিক)', required: false },
+      { name: 'applicant_mobile', label: 'আবেদনকারীর নাম ও মোবাইল নম্বর', type: 'text', placeholder: 'নাম ও সচল মোবাইল নম্বর', required: true }
+    ]
+  },
+  {
+    id: 'land-khatian-dag-search',
+    title: 'খতিয়ান ও দাগের তথ্য অনুসন্ধান',
+    titleEn: 'Khatian & Dag Information Search',
+    description: 'দাগ নম্বর, খতিয়ান নম্বর বা মালিকের নাম দিয়ে জমির বিস্তারিত তথ্য অনুসন্ধান',
+    icon: '🔍',
+    color: 'bg-emerald-600',
+    category: 'land',
+    price: 100,
+    popular: true,
+    deliveryTime: '১-৩ ঘণ্টা',
+    officialNote: 'দাগ নম্বর, খতিয়ান নম্বর অথবা মালিকের নাম ও পিতার নাম দিয়ে জমির তথ্য অনুসন্ধান করুন।',
+    fields: [
+      { name: 'district_upazila', label: 'জেলা ও উপজেলা', type: 'text', placeholder: 'জেলা ও উপজেলার নাম', required: true },
+      { name: 'mouza_jl', label: 'মৌজার নাম ও জে.এল নম্বর', type: 'text', placeholder: 'মৌজার নাম ও জে.এল নং', required: true },
+      { name: 'survey_type', label: 'জরিপের ধরন', type: 'select', options: ['আরএস (RS)', 'বিএস (BS)', 'এসএ (SA)', 'সিএস (CS)', 'বিআরএস (BRS)', 'নামজারি'], required: true },
+      { name: 'search_by', label: 'অনুসন্ধানের মাধ্যম', type: 'select', options: ['দাগ নম্বর দিয়ে অনুসন্ধান', 'খতিয়ান নম্বর দিয়ে অনুসন্ধান', 'মালিকের নাম ও পিতার নাম দিয়ে অনুসন্ধান'], required: true },
+      { name: 'search_details', label: 'দাগ নম্বর / খতিয়ান নম্বর / মালিকের নাম ও পিতার নাম', type: 'textarea', placeholder: 'যার মাধ্যমে খুঁজতে চান সেই দাগ নং, খতিয়ান নং বা মালিকের পূর্ণ নাম ও পিতার নাম লিখুন', required: true },
+      { name: 'applicant_mobile', label: 'আবেদনকারীর মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true }
+    ]
+  },
+  {
+    id: 'land-ldtax-payment',
+    title: 'ভূমি উন্নয়ন কর (খাজনা) প্রদান',
+    titleEn: 'Land Development Tax (Khajna)',
+    description: 'অনলাইনে জমির ভূমি উন্নয়ন কর (খাজনা) পরিশোধ ও হোল্ডিং নিবন্ধন সেবা',
+    icon: '💳',
+    color: 'bg-green-700',
+    category: 'land',
+    price: 200,
+    popular: true,
+    deliveryTime: '১২-২৪ ঘণ্টা',
+    officialNote: 'ldtax.gov.bd পোর্টালে হোল্ডিং এন্ট্রি ও ভূমি উন্নয়ন কর (খাজনা) পরিশোধের জন্য নিচের তথ্য দিন।',
+    fields: [
+      { name: 'district_upazila', label: 'জেলা ও উপজেলা', type: 'text', placeholder: 'জেলা ও উপজেলার নাম', required: true },
+      { name: 'mouza_jl', label: 'মৌজার নাম ও জে.এল নম্বর', type: 'text', placeholder: 'মৌজার নাম ও জে.এল নং', required: true },
+      { name: 'holding_no', label: 'হোল্ডিং নম্বর', type: 'text', placeholder: 'হোল্ডিং নম্বর লিখুন', required: true },
+      { name: 'khatian_dag_no', label: 'খতিয়ান নম্বর ও দাগ নম্বর', type: 'text', placeholder: 'খতিয়ান নং ও দাগ নং', required: true },
+      { name: 'land_type_amount', label: 'জমির ধরন (কৃষি/অকৃষি) ও পরিমাণ', type: 'text', placeholder: 'যেমন: আবাসিক/কৃষি, ১০ শতাংশ', required: true },
+      { name: 'owner_name_nid', label: 'মালিকের নাম ও NID নম্বর', type: 'text', placeholder: 'জমির মালিকের পূর্ণ নাম ও NID নম্বর', required: true },
+      { name: 'owner_mobile', label: 'মালিকের মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true },
+      { name: 'previous_dakhila_doc', label: 'পূর্বের দাখিলা বা খতিয়ানের কপি (যদি থাকে)', type: 'file', required: false }
+    ]
+  },
+  {
+    id: 'land-dakhila-collection',
+    title: 'দাখিলা সংগ্রহ',
+    titleEn: 'Online Dakhila Collection',
+    description: 'ভূমি উন্নয়ন কর (খাজনা) পরিশোধের সরকারি অনলাইন দাখিলা (রশিদ) সংগ্রহ',
+    icon: '🧾',
+    color: 'bg-teal-600',
+    category: 'land',
+    price: 100,
+    deliveryTime: '১-৩ ঘণ্টা',
+    officialNote: 'ভূমি উন্নয়ন কর (খাজনা) পরিশোধের সরকারি অনলাইন দাখিলা (রশিদ) ডাউনলোড ও সংগ্রহ।',
+    fields: [
+      { name: 'district_upazila', label: 'জেলা ও উপজেলা', type: 'text', placeholder: 'জেলা ও উপজেলার নাম', required: true },
+      { name: 'mouza', label: 'মৌজার নাম ও জে.এল নম্বর', type: 'text', placeholder: 'মৌজার নাম', required: true },
+      { name: 'holding_no', label: 'হোল্ডিং নম্বর', type: 'text', placeholder: 'হোল্ডিং নম্বর লিখুন', required: true },
+      { name: 'khatian_or_dakhila_no', label: 'খতিয়ান নম্বর / পূর্বের দাখিলা নম্বর', type: 'text', placeholder: 'খতিয়ান নং বা দাখিলা নং', required: true },
+      { name: 'owner_name_mobile', label: 'মালিকের নাম ও নিবন্ধিত মোবাইল নম্বর', type: 'text', placeholder: 'মালিকের নাম ও মোবাইল নম্বর', required: true }
+    ]
+  },
+  {
+    id: 'land-mouza-map',
+    title: 'মৌজা ম্যাপ / নকশা সংগ্রহ',
+    titleEn: 'Mouza Map / Noksha Collection',
+    description: 'সিএস, এসএ, আরএস ও বিএস জরিপের মৌজা ম্যাপ / জমির নকশা সংগ্রহ',
+    icon: '🗺️',
+    color: 'bg-lime-800',
+    category: 'land',
+    price: 350,
+    popular: true,
+    deliveryTime: '৬-২৪ ঘণ্টা',
+    officialNote: 'সিএস, এসএ, আরএস ও বিএস জরিপের মৌজা ম্যাপ / নকশা সংগ্রহের জন্য সঠিক শীট ও জে.এল নম্বর দিন।',
+    fields: [
+      { name: 'district_upazila', label: 'জেলা ও উপজেলা', type: 'text', placeholder: 'জেলা ও উপজেলার নাম', required: true },
+      { name: 'mouza_jl', label: 'মৌজার নাম ও জে.এল (J.L) নম্বর', type: 'text', placeholder: 'মৌজার নাম ও জে.এল নম্বর', required: true },
+      { name: 'survey_type', label: 'জরিপের ধরন (Survey Type)', type: 'select', options: ['আরএস (RS)', 'বিএস (BS)', 'এসএ (SA)', 'সিএস (CS)', 'বিআরএস (BRS)'], required: true },
+      { name: 'sheet_no', label: 'শীট নম্বর (Sheet No)', type: 'text', placeholder: 'যেমন: শীট নং- ১, ২', required: true },
+      { name: 'dag_no', label: 'নির্দিষ্ট দাগ নম্বর (যদি মার্ক করা নকশা লাগে)', type: 'text', placeholder: 'দাগ নম্বর (ঐচ্ছিক)', required: false },
+      { name: 'applicant_mobile', label: 'আবেদনকারীর নাম ও মোবাইল নম্বর', type: 'text', placeholder: 'নাম ও মোবাইল নম্বর', required: true }
+    ]
+  },
+  {
+    id: 'land-mutation-status',
+    title: 'নামজারি আবেদনের স্ট্যাটাস যাচাই',
+    titleEn: 'Mutation Application Status Check',
+    description: 'ই-নামজারি আবেদনের বর্তমান অবস্থা, শুনানির তারিখ ও আদেশের তথ্য যাচাই',
+    icon: '📋',
+    color: 'bg-green-800',
+    category: 'land',
+    price: 50,
+    deliveryTime: '৩০ মিনিট - ২ ঘণ্টা',
+    officialNote: 'ই-নামজারি আবেদনের বর্তমান অবস্থান, শুনানির তারিখ ও আদেশের বিস্তারিত স্ট্যাটাস জানুন।',
+    fields: [
+      { name: 'division_district_upazila', label: 'বিভাগ, জেলা ও উপজেলা/সার্কেল', type: 'text', placeholder: 'বিভাগ, জেলা ও উপজেলার নাম', required: true },
+      { name: 'application_or_case_id', label: 'আবেদন নম্বর (Application ID) / মামলা (Case) নম্বর', type: 'text', placeholder: 'Application ID অথবা Case No লিখুন', required: true },
+      { name: 'applicant_nid', label: 'আবেদনকারীর NID নম্বর', type: 'text', placeholder: 'জাতীয় পরিচয়পত্র নম্বর', required: true },
+      { name: 'applicant_mobile', label: 'মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true }
+    ]
+  },
+  {
+    id: 'land-certified-khatian',
+    title: 'খতিয়ানের সার্টিফাইড কপি',
+    titleEn: 'Certified Copy of Khatian',
+    description: 'জেলা রেকর্ড রুম থেকে খতিয়ান/পর্চার সরকারি সার্টিফাইড কপির আবেদন ও সংগ্রহ',
+    icon: '📑',
+    color: 'bg-emerald-700',
+    category: 'land',
+    price: 250,
+    popular: true,
+    deliveryTime: '৩-৭ কার্যদিবস',
+    officialNote: 'জেলা রেকর্ড রুম থেকে খতিয়ান/পর্চার সরকারি সার্টিফাইড (জাবেদা) কপির জন্য অফিসিয়াল আবেদন।',
+    fields: [
+      { name: 'division_district_upazila', label: 'বিভাগ, জেলা ও উপজেলা', type: 'text', placeholder: 'বিভাগ, জেলা ও উপজেলার নাম', required: true },
+      { name: 'mouza_jl', label: 'মৌজার নাম ও জে.এল নম্বর', type: 'text', placeholder: 'মৌজার নাম ও জে.এল নং', required: true },
+      { name: 'survey_type', label: 'জরিপের ধরন', type: 'select', options: ['আরএস (RS)', 'বিএস (BS)', 'এসএ (SA)', 'সিএস (CS)', 'বিআরএস (BRS)', 'নামজারি'], required: true },
+      { name: 'khatian_no', label: 'খতিয়ান নম্বর ও মালিকের নাম', type: 'text', placeholder: 'খতিয়ান নং ও রেকর্ডীয় মালিকের নাম', required: true },
+      { name: 'applicant_name_nid', label: 'আবেদনকারীর নাম ও NID নম্বর', type: 'text', placeholder: 'পূর্ণ নাম ও NID নম্বর', required: true },
+      { name: 'delivery_address', label: 'ডাকযোগে ডেলিভারি ঠিকানা ও সচল মোবাইল নম্বর', type: 'textarea', placeholder: 'বাসা/গ্রাম, ডাকঘর, উপজেলা, জেলা এবং মোবাইল নম্বর', required: true }
+    ]
+  },
+  {
+    id: 'land-tax-holding-info',
+    title: 'ভূমি করের হিসাব ও হোল্ডিং তথ্য',
+    titleEn: 'Land Tax Calculation & Holding Info',
+    description: 'বকেয়া খাজনার সঠিক হিসাব নির্ণয় এবং অনলাইন হোল্ডিংয়ের বিস্তারিত তথ্য যাচাই',
+    icon: '🧮',
+    color: 'bg-teal-700',
+    category: 'land',
+    price: 100,
+    deliveryTime: '১-৪ ঘণ্টা',
+    officialNote: 'বকেয়া ও হাল খাজনার সঠিক হিসাব নির্ণয় এবং অনলাইন হোল্ডিংয়ের বিস্তারিত তথ্য যাচাই।',
+    fields: [
+      { name: 'district_upazila_mouza', label: 'জেলা, উপজেলা ও মৌজার নাম', type: 'text', placeholder: 'জেলা, উপজেলা ও মৌজা লিখুন', required: true },
+      { name: 'holding_khatian_no', label: 'হোল্ডিং নম্বর ও খতিয়ান নম্বর', type: 'text', placeholder: 'হোল্ডিং নং ও খতিয়ান নং', required: true },
+      { name: 'land_category', label: 'জমির ব্যবহার ভিত্তিক শ্রেণী', type: 'select', options: ['কৃষি (নাল/ফসলি)', 'আবাসিক (ভিটা/বাড়ি)', 'বাণিজ্যিক', 'শিল্প', 'অন্যান্য'], required: true },
+      { name: 'total_land_amount', label: 'মোট জমির পরিমাণ (শতাংশ)', type: 'text', placeholder: 'যেমন: ১৫ শতাংশ', required: true },
+      { name: 'last_paid_year', label: 'সর্বশেষ খাজনা পরিশোধের সন (বাংলা/ইংরেজি)', type: 'text', placeholder: 'যেমন: ১৪২৯ বঙ্গাব্দ / ২০২২ সাল', required: true },
+      { name: 'owner_mobile', label: 'মালিকের নাম ও মোবাইল নম্বর', type: 'text', placeholder: 'নাম ও মোবাইল নম্বর', required: true }
+    ]
+  },
+  {
+    id: 'land-record-ownership',
+    title: 'জমির রেকর্ড ও মালিকানা তথ্য',
+    titleEn: 'Land Record & Ownership Verification',
+    description: 'জমির পূর্ববর্তী ও বর্তমান রেকর্ড, খতিয়ান এবং মালিকানা যাচাই সেবা',
+    icon: '🏛️',
+    color: 'bg-green-900',
+    category: 'land',
+    price: 200,
+    deliveryTime: '৩-১২ ঘণ্টা',
+    officialNote: 'জমির পূর্ববর্তী ও বর্তমান রেকর্ড, খতিয়ান এবং প্রকৃত মালিকানা যাচাই সেবা।',
+    fields: [
+      { name: 'district_upazila_mouza', label: 'জেলা, উপজেলা ও মৌজা (জে.এল নম্বরসহ)', type: 'text', placeholder: 'জেলা, উপজেলা, মৌজা ও জে.এল নং', required: true },
+      { name: 'survey_type', label: 'জরিপের ধরন', type: 'select', options: ['বিএস (BS)', 'আরএস (RS)', 'এসএ (SA)', 'সিএস (CS)', 'নামজারি রেকর্ড'], required: true },
+      { name: 'khatian_dag_no', label: 'খতিয়ান নম্বর ও দাগ নম্বর', type: 'text', placeholder: 'খতিয়ান নং ও দাগ নং', required: true },
+      { name: 'owner_name_father', label: 'যার নামে মালিকানা যাচাই করবেন তার নাম ও পিতার নাম', type: 'text', placeholder: 'মালিকের নাম ও পিতার নাম', required: true },
+      { name: 'deed_info', label: 'দলিল নম্বর, সাল ও সাব-রেজিস্ট্রি অফিস (যদি থাকে)', type: 'text', placeholder: 'দলিল নম্বর ও সাল (ঐচ্ছিক)', required: false },
+      { name: 'applicant_mobile', label: 'আবেদনকারীর মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true }
+    ]
+  },
+  {
+    id: 'land-application-appeal',
+    title: 'ভূমি সংক্রান্ত আবেদন ও আপিল',
+    titleEn: 'Land Misc Case & Appeal Application',
+    description: 'মিস কেস (Misc Case), নামজারি রিভিউ/আপিল এবং খতিয়ানের করণিক ভুল সংশোধনের আবেদন',
+    icon: '⚖️',
+    color: 'bg-lime-700',
+    category: 'land',
+    price: 400,
+    deliveryTime: '২৪-৪৮ ঘণ্টা',
+    officialNote: 'মিস কেস (Misc Case), নামজারি রিভিউ/আপিল এবং খতিয়ানের করণিক ভুল সংশোধনের অফিসিয়াল আবেদন।',
+    fields: [
+      { name: 'appeal_type', label: 'আবেদন / আপিলের ধরন', type: 'select', options: ['নামজারি রিভিউ / আপিল আবেদন', 'মিস কেস (Misc Case) আবেদন', 'খতিয়ানের করণিক ভুল সংশোধন', 'হোল্ডিং বাতিল / সংশোধন আবেদন', 'অন্যান্য ভূমি সংক্রান্ত আবেদন'], required: true },
+      { name: 'district_upazila_mouza', label: 'জেলা, উপজেলা/সার্কেল ও মৌজা', type: 'text', placeholder: 'জেলা, উপজেলা ও মৌজার নাম', required: true },
+      { name: 'khatian_dag_case', label: 'খতিয়ান নং, দাগ নং ও পূর্বের নামজারি কেস নম্বর', type: 'text', placeholder: 'খতিয়ান, দাগ ও মামলা নম্বর', required: true },
+      { name: 'appeal_reason', label: 'আবেদন বা আপিলের বিস্তারিত কারণ ও চাহিদা', type: 'textarea', placeholder: 'কী সমস্যা বা কী সংশোধন/আপিল করতে চান তা বিস্তারিত লিখুন...', required: true },
+      { name: 'applicant_nid_mobile', label: 'আবেদনকারীর নাম, NID ও মোবাইল নম্বর', type: 'text', placeholder: 'নাম, NID ও মোবাইল নম্বর', required: true },
+      { name: 'supporting_doc', label: 'প্রমাণক কাগজপত্র (খতিয়ান/দলিল/আদেশের কপি)', type: 'file', required: true }
+    ]
+  },
+  {
+    id: 'land-online-application',
+    title: 'অনলাইনে ভূমি সেবা আবেদন',
+    titleEn: 'Online Land Service Application',
+    description: 'নাগরিক ভূমি পোর্টাল রেজিস্ট্রেশন, নতুন হোল্ডিং এন্ট্রি ও যেকোনো অনলাইন ভূমি সেবা আবেদন',
+    icon: '🌐',
+    color: 'bg-emerald-600',
+    category: 'land',
+    price: 150,
+    popular: true,
+    deliveryTime: '২-১২ ঘণ্টা',
+    officialNote: 'নাগরিক ভূমি পোর্টাল নিবন্ধন, নতুন হোল্ডিং ওপেন, খতিয়ান যুক্তকরণসহ যেকোনো অনলাইন ভূমি সেবা।',
+    fields: [
+      { name: 'online_service_type', label: 'প্রয়োজনীয় অনলাইন ভূমি সেবার নাম', type: 'select', options: ['নতুন অনলাইন হোল্ডিং এন্ট্রি', 'নাগরিক ভূমি প্রোফাইল খোলা ও NID ভেরিফিকেশন', 'প্রোফাইলে খতিয়ান যুক্তকরণ', 'অন্যান্য অনলাইন ভূমি সেবা'], required: true },
+      { name: 'applicant_name_dob', label: 'আবেদনকারীর নাম ও জন্ম তারিখ (NID অনুযায়ী)', type: 'text', placeholder: 'পূর্ণ নাম ও জন্ম তারিখ (DD/MM/YYYY)', required: true },
+      { name: 'applicant_nid_mobile', label: 'আবেদনকারীর NID নম্বর ও সচল মোবাইল নম্বর', type: 'text', placeholder: 'NID নম্বর ও মোবাইল নম্বর', required: true },
+      { name: 'land_details', label: 'জমির পূর্ণ বিবরণ (জেলা, উপজেলা, মৌজা, খতিয়ান ও দাগ নং)', type: 'textarea', placeholder: 'জেলা, উপজেলা, মৌজা, খতিয়ান নম্বর, দাগ নম্বর ও জমির পরিমাণ লিখুন', required: true },
+      { name: 'khatian_nid_doc', label: 'খতিয়ান/পর্চা এবং NID কার্ডের কপি আপলোড', type: 'file', required: true }
+    ]
+  },
 
   // ─────────────────────────────────────────────
   // 🎓 শিক্ষা সেবা
@@ -334,7 +592,7 @@ export const categories = [
 ]
 
 export const stats = [
-  { label: 'মোট সেবা সংখ্যা', value: '৪৬', icon: '⚡' },
+  { label: 'মোট সেবা সংখ্যা', value: '৫৪', icon: '⚡' },
   { label: 'মোট ব্যবহারকারী', value: '৩,৩৯,৯৭১', icon: '👥' },
   { label: 'মোট উদ্যোক্তা', value: '৭,৬২৯', icon: '👤' },
   { label: 'মোট সেন্টার', value: '৩২৯', icon: '🏢' },
