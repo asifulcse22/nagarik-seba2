@@ -13,7 +13,7 @@ import type { Profile } from '@/lib/supabase'
 import { categories, services as staticServices } from '@/lib/services'
 import type { LandFormField } from '@/lib/services'
 
-const WHATSAPP_LINK = "https://wa.me/message/UHAWF6Q5VKZ5I1"
+const WHATSAPP_LINK = "https://wa.me/message/IY7KGUVR6BJWC1"
 
 export default function DashboardPage() {
   const router = useRouter()
