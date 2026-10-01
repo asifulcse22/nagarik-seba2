@@ -177,13 +177,13 @@ export const services: Service[] = [
 
   { 
     id: 'smart-id-card', 
-    title: 'স্মার্ট ID কার্ড', 
+    title: 'স্মার্ট ID কার্ড PDF', 
     titleEn: 'Smart ID Card', 
     description: 'অরিজিনাল স্মার্ট আইডি কার্ড কপি', 
     icon: '💳', 
     color: 'bg-purple-700', 
     category: 'nid', 
-    price: 699, 
+    price: 155, 
     popular: true, 
     inputLabel: 'নাম ও আইডি নাম্বার', 
     inputPlaceholder: 'পূর্ণ নাম / আইডি নাম্বার দিন' 
@@ -261,6 +261,173 @@ export const services: Service[] = [
   { id: 'birth-copy', title: 'জন্ম নিবন্ধন কপি', titleEn: 'Birth Reg Copy', description: 'জন্মনিবন্ধন সনদের ডিজিটাল কপি', icon: '📄', color: 'bg-green-500', category: 'birth', price: 35, popular: true, inputLabel: 'জন্ম নিবন্ধন নাম্বার', inputPlaceholder: 'জন্ম নিবন্ধন নাম্বার দিন' },
   { id: 'birth-correction', title: 'জন্মনিবন্ধন সংশোধন', titleEn: 'Birth Reg Correction', description: 'জন্মনিবন্ধনের তথ্য সংশোধন', icon: '✏️', color: 'bg-green-600', category: 'birth', price: 200, inputLabel: 'জন্ম নিবন্ধন নাম্বার ও সংশোধনের তথ্য', inputPlaceholder: 'জন্ম নিবন্ধন নাম্বার / কী সংশোধন করতে চান' },
   { id: 'death-certificate', title: 'মৃত্যু সনদ', titleEn: 'Death Certificate', description: 'মৃত্যু নিবন্ধন সনদ সংগ্রহ', icon: '📜', color: 'bg-gray-600', category: 'birth', price: 150, inputLabel: 'মৃত ব্যক্তির নাম ও তথ্য', inputPlaceholder: 'মৃত ব্যক্তির নাম / মৃত্যু তারিখ' },
+
+  // ─────────────────────────────────────────────
+  // ♿ সুবর্ণ কার্ড (প্রতিবন্ধী পরিচয়পত্র ও সমাজসেবা)
+  // ─────────────────────────────────────────────
+  {
+    id: 'suborno-card-new-apply',
+    title: 'নতুন সুবর্ণ নাগরিক কার্ড আবেদন',
+    titleEn: 'New Suborno Card Application',
+    description: 'সমাজসেবা অধিদপ্তরের প্রতিবন্ধী পরিচয়পত্র (সুবর্ণ নাগরিক কার্ড) ও সনদের নতুন অনলাইন আবেদন',
+    icon: '♿',
+    color: 'bg-amber-600',
+    category: 'suborno',
+    price: 300,
+    popular: true,
+    deliveryTime: '২৪-৪৮ ঘণ্টা',
+    officialNote: 'সমাজসেবা অধিদপ্তর (dis.gov.bd) এর অফিসিয়াল ফরম্যাট অনুযায়ী সুবর্ণ নাগরিক কার্ডের জন্য নিচের তথ্য ও ছবি প্রদান করুন।',
+    fields: [
+      { name: 'applicant_name_bn_en', label: 'আবেদনকারীর পূর্ণ নাম (বাংলা ও ইংরেজিতে)', type: 'text', placeholder: 'বাংলা ও ইংরেজি বড় হাতের অক্ষরে নাম লিখুন', required: true },
+      { name: 'father_mother_name', label: 'পিতার নাম ও মাতার নাম (বিবাহিত হলে স্বামী/স্ত্রীর নাম)', type: 'text', placeholder: 'পিতার নাম, মাতার নাম ও স্বামী/স্ত্রীর নাম', required: true },
+      { name: 'dob_gender_blood', label: 'জন্ম তারিখ, লিঙ্গ ও রক্তের গ্রুপ', type: 'text', placeholder: 'যেমন: 15/05/1998, পুরুষ/মহিলা, B+', required: true },
+      { name: 'nid_or_brn', label: 'NID নম্বর অথবা ১৭ ডিজিটের অনলাইন জন্ম নিবন্ধন নম্বর', type: 'text', placeholder: 'NID বা জন্ম নিবন্ধন নম্বর দিন', required: true },
+      { name: 'disability_type', label: 'প্রতিবন্ধিতার ধরন (Disability Type)', type: 'select', options: ['শারীরিক প্রতিবন্ধিতা', 'দৃষ্টি প্রতিবন্ধিতা', 'বাক প্রতিবন্ধিতা', 'শ্রবণ প্রতিবন্ধিতা', 'বুদ্ধি প্রতিবন্ধিতা', 'অটিজম বা অটিজম স্পেকট্রাম', 'মানসিক অসুস্থতাজনিত প্রতিবন্ধিতা', 'সেরিব্রাল পালসি', 'ডাউন সিনড্রোম', 'শ্রবণ ও দৃষ্টি প্রতিবন্ধিতা', 'বহুমাত্রিক প্রতিবন্ধিতা', 'অন্যান্য'], required: true },
+      { name: 'disability_severity_cause', label: 'প্রতিবন্ধিতার মাত্রা ও কারণ', type: 'select', options: ['মৃদু (জন্মগত)', 'মাঝারি (জন্মগত)', 'তীব্র (জন্মগত)', 'চরম (জন্মগত)', 'মাঝারি/তীব্র (দুর্ঘটনা বা অসুস্থতাজনিত)'], required: true },
+      { name: 'full_address', label: 'বর্তমান ও স্থায়ী ঠিকানা (বিভাগ, জেলা, উপজেলা/শহর সমাজসেবা অফিস, ইউনিয়ন/ওয়ার্ড, গ্রাম)', type: 'textarea', placeholder: 'জেলা, উপজেলা, ইউনিয়ন/পৌরসভা, ওয়ার্ড নং ও গ্রামের নাম লিখুন', required: true },
+      { name: 'guardian_mobile', label: 'অভিভাবকের নাম ও সচল মোবাইল নম্বর', type: 'text', placeholder: 'অভিভাবকের নাম ও মোবাইল (01XXXXXXXXX)', required: true },
+      { name: 'applicant_photos', label: 'পাসপোর্ট সাইজ ছবি ও প্রতিবন্ধিতার পূর্ণাঙ্গ ছবি (Full Photo)', type: 'file', required: true },
+      { name: 'nid_medical_doc', label: 'NID/জন্ম নিবন্ধন সনদ ও চিকিৎসা সনদপত্র (থাকলে)', type: 'file', required: true }
+    ]
+  },
+  {
+    id: 'suborno-card-download',
+    title: 'সুবর্ণ কার্ড ডাউনলোড (অনলাইন কপি)',
+    titleEn: 'Suborno Card PDF Download',
+    description: 'নিবন্ধিত প্রতিবন্ধী ব্যক্তির ডিজিটাল সুবর্ণ নাগরিক পরিচয়পত্র ও সনদের PDF কপি সংগ্রহ',
+    icon: '🪪',
+    color: 'bg-yellow-600',
+    category: 'suborno',
+    price: 100,
+    popular: true,
+    deliveryTime: '১-৩ ঘণ্টা',
+    officialNote: 'ডিজিটাল সুবর্ণ নাগরিক কার্ড ও সনদের অনলাইন PDF কপি ডাউনলোড করতে নিচের তথ্য দিন।',
+    fields: [
+      { name: 'suborno_pin_or_tracking', label: 'সুবর্ণ কার্ড পিন (PIN) নম্বর / ট্র্যাকিং নম্বর (যদি থাকে)', type: 'text', placeholder: 'সুবর্ণ কার্ডের পিন বা ট্র্যাকিং নম্বর', required: false },
+      { name: 'nid_or_brn', label: 'NID নম্বর অথবা জন্ম নিবন্ধন নম্বর', type: 'text', placeholder: '১০/১৭ ডিজিটের NID বা জন্ম নিবন্ধন নম্বর', required: true },
+      { name: 'dob', label: 'জন্ম তারিখ (DD/MM/YYYY)', type: 'text', placeholder: 'যেমন: 01/01/2000', required: true },
+      { name: 'district_upazila', label: 'জেলা ও উপজেলার নাম', type: 'text', placeholder: 'জেলা ও উপজেলার নাম লিখুন', required: true },
+      { name: 'applicant_mobile', label: 'আবেদনকারীর নাম ও মোবাইল নম্বর', type: 'text', placeholder: 'নাম ও মোবাইল নম্বর', required: true }
+    ]
+  },
+  {
+    id: 'suborno-card-correction',
+    title: 'সুবর্ণ কার্ড তথ্য সংশোধন',
+    titleEn: 'Suborno Card Correction',
+    description: 'সুবর্ণ নাগরিক কার্ডে নাম, পিতা-মাতার নাম, জন্ম তারিখ বা প্রতিবন্ধিতার ধরন সংশোধন আবেদন',
+    icon: '✍️',
+    color: 'bg-orange-600',
+    category: 'suborno',
+    price: 250,
+    popular: true,
+    deliveryTime: '২-৫ দিন',
+    officialNote: 'সুবর্ণ কার্ডের ভুল তথ্য সংশোধনের জন্য বর্তমান কার্ডের তথ্য ও সঠিক সনদ প্রদান করুন।',
+    fields: [
+      { name: 'suborno_pin', label: 'বর্তমান সুবর্ণ কার্ড নম্বর (PIN)', type: 'text', placeholder: 'সুবর্ণ কার্ডের নম্বর লিখুন', required: true },
+      { name: 'nid_or_brn', label: 'সঠিক NID / জন্ম নিবন্ধন নম্বর ও জন্ম তারিখ', type: 'text', placeholder: 'NID বা জন্ম নিবন্ধন নম্বর ও জন্ম তারিখ', required: true },
+      { name: 'district_upazila', label: 'জেলা ও উপজেলা সমাজসেবা কার্যালয়', type: 'text', placeholder: 'জেলা ও উপজেলার নাম', required: true },
+      { name: 'correction_details', label: 'সংশোধনের বিবরণ (কী ভুল আছে এবং সঠিক কী হবে)', type: 'textarea', placeholder: 'যেমন: নামের বানান, জন্ম তারিখ বা ঠিকানা যা সংশোধন করতে চান তা বিস্তারিত লিখুন', required: true },
+      { name: 'supporting_docs', label: 'বর্তমান সুবর্ণ কার্ড ও সঠিক NID/জন্ম নিবন্ধনের কপি', type: 'file', required: true }
+    ]
+  },
+  {
+    id: 'suborno-disability-allowance',
+    title: 'প্রতিবন্ধী ভাতা আবেদন',
+    titleEn: 'Disability Allowance Application',
+    description: 'সুবর্ণ কার্ডধারীদের সরকারি মাসিক প্রতিবন্ধী ভাতার জন্য অনলাইন (MIS) আবেদন',
+    icon: '💰',
+    color: 'bg-emerald-600',
+    category: 'suborno',
+    price: 200,
+    popular: true,
+    deliveryTime: '১২-২৪ ঘণ্টা',
+    officialNote: 'সমাজসেবা অধিদপ্তরের এমআইএস (mis.bhata.gov.bd) পোর্টালে প্রতিবন্ধী ভাতার অনলাইন আবেদনের ফর্ম।',
+    fields: [
+      { name: 'suborno_pin', label: 'সুবর্ণ নাগরিক কার্ড নম্বর (PIN)', type: 'text', placeholder: 'সুবর্ণ কার্ডের পিন নম্বর দিন', required: true },
+      { name: 'applicant_name_nid', label: 'আবেদনকারীর নাম এবং NID / জন্ম নিবন্ধন নম্বর', type: 'text', placeholder: 'পূর্ণ নাম ও NID/জন্ম নিবন্ধন নম্বর', required: true },
+      { name: 'dob', label: 'জন্ম তারিখ (DD/MM/YYYY)', type: 'text', placeholder: 'জন্ম তারিখ লিখুন', required: true },
+      { name: 'address_details', label: 'জেলা, উপজেলা, ইউনিয়ন/পৌরসভা ও ওয়ার্ড নম্বর', type: 'text', placeholder: 'জেলা, উপজেলা, ইউনিয়ন ও ওয়ার্ড নং', required: true },
+      { name: 'mfs_account', label: 'ভাতা গ্রহণের নগদ (Nagad) বা বিকাশ (bKash) মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX (নগদ বা বিকাশ উল্লেখ করুন)', required: true },
+      { name: 'nominee_info', label: 'নমিনির নাম, সম্পর্ক ও NID নম্বর', type: 'text', placeholder: 'নমিনির নাম, সম্পর্ক ও NID নম্বর', required: true },
+      { name: 'suborno_nid_copy', label: 'সুবর্ণ কার্ড ও NID/জন্ম নিবন্ধনের কপি আপলোড', type: 'file', required: true }
+    ]
+  },
+  {
+    id: 'suborno-education-stipend',
+    title: 'প্রতিবন্ধী শিক্ষা উপবৃত্তি আবেদন',
+    titleEn: 'Disability Education Stipend',
+    description: 'সুবর্ণ কার্ডধারী শিক্ষার্থীদের (প্রাথমিক থেকে উচ্চতর স্তর) সরকারি শিক্ষা উপবৃত্তির আবেদন',
+    icon: '🎓',
+    color: 'bg-violet-600',
+    category: 'suborno',
+    price: 200,
+    deliveryTime: '২৪ ঘণ্টা',
+    officialNote: 'প্রতিবন্ধী শিক্ষার্থীদের সরকারি মাসিক শিক্ষা উপবৃত্তির জন্য অফিসিয়াল তথ্য দিন।',
+    fields: [
+      { name: 'student_name_pin', label: 'শিক্ষার্থীর নাম ও সুবর্ণ কার্ড নম্বর (PIN)', type: 'text', placeholder: 'নাম ও সুবর্ণ কার্ড নম্বর', required: true },
+      { name: 'brn_or_nid', label: 'জন্ম নিবন্ধন / NID নম্বর ও জন্ম তারিখ', type: 'text', placeholder: 'জন্ম নিবন্ধন নম্বর ও জন্ম তারিখ', required: true },
+      { name: 'education_level', label: 'শিক্ষার স্তর', type: 'select', options: ['প্রাথমিক স্তর (১ম - ৫ম শ্রেণী)', 'মাধ্যমিক স্তর (৬ষ্ঠ - ১০ম শ্রেণী)', 'উচ্চ মাধ্যমিক স্তর (১১শ - ১২শ শ্রেণী)', 'উচ্চতর স্তর (স্নাতক / স্নাতকোত্তর)'], required: true },
+      { name: 'institute_details', label: 'শিক্ষা প্রতিষ্ঠানের নাম, শ্রেণী, রোল নম্বর ও উপজেলা/জেলা', type: 'textarea', placeholder: 'স্কুল/কলেজের নাম, শ্রেণী, রোল নং ও ঠিকানা লিখুন', required: true },
+      { name: 'guardian_mfs', label: 'অভিভাবকের নাম, NID ও সচল নগদ/বিকাশ নম্বর', type: 'text', placeholder: 'অভিভাবকের নাম, NID ও মোবাইল ব্যাংকিং নম্বর', required: true },
+      { name: ' recommendation_doc', label: 'প্রতিষ্ঠান প্রধানের প্রত্যয়নপত্র ও সুবর্ণ কার্ডের কপি', type: 'file', required: true }
+    ]
+  },
+  {
+    id: 'suborno-status-verification',
+    title: 'সুবর্ণ কার্ড যাচাই ও স্ট্যাটাস চেক',
+    titleEn: 'Suborno Card Verification & Status',
+    description: 'সুবর্ণ নাগরিক কার্ডের সত্যতা যাচাই (DIS Verification) এবং আবেদনের বর্তমান অবস্থা চেক',
+    icon: '🔍',
+    color: 'bg-teal-600',
+    category: 'suborno',
+    price: 50,
+    deliveryTime: '৩০ মিনিট - ২ ঘণ্টা',
+    officialNote: 'সুবর্ণ কার্ডের অনলাইন রেকর্ড যাচাই অথবা নতুন আবেদনের বর্তমান অবস্থা জানতে তথ্য দিন।',
+    fields: [
+      { name: 'pin_or_nid', label: 'সুবর্ণ কার্ড পিন (PIN) / ট্র্যাকিং নম্বর অথবা NID/জন্ম নিবন্ধন নম্বর', type: 'text', placeholder: 'পিন, ট্র্যাকিং অথবা NID/জন্ম নিবন্ধন নম্বর দিন', required: true },
+      { name: 'dob', label: 'জন্ম তারিখ (DD/MM/YYYY)', type: 'text', placeholder: 'যেমন: 10/02/2005', required: true },
+      { name: 'district_upazila', label: 'জেলা ও উপজেলার নাম', type: 'text', placeholder: 'জেলা ও উপজেলার নাম', required: true },
+      { name: 'mobile', label: 'মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true }
+    ]
+  },
+  {
+    id: 'suborno-card-reissue',
+    title: 'হারানো/নষ্ট সুবর্ণ কার্ড উত্তোলন',
+    titleEn: 'Lost/Damaged Suborno Card Re-issue',
+    description: 'হারিয়ে যাওয়া বা নষ্ট হওয়া সুবর্ণ নাগরিক পরিচয়পত্র পুনরায় উত্তোলনের আবেদন',
+    icon: '🔄',
+    color: 'bg-rose-600',
+    category: 'suborno',
+    price: 180,
+    deliveryTime: '১২-২৪ ঘণ্টা',
+    officialNote: 'হারানো বা নষ্ট হওয়া সুবর্ণ কার্ডের ডুপ্লিকেট/পুনঃইস্যু কপি পেতে নিচের তথ্য পূরণ করুন।',
+    fields: [
+      { name: 'applicant_name_father', label: 'আবেদনকারীর নাম ও পিতার নাম', type: 'text', placeholder: 'নাম ও পিতার নাম লিখুন', required: true },
+      { name: 'suborno_pin_nid', label: 'সুবর্ণ কার্ড নম্বর (জানা থাকলে) ও NID/জন্ম নিবন্ধন নম্বর', type: 'text', placeholder: 'কার্ড নং বা NID/জন্ম নিবন্ধন নম্বর', required: true },
+      { name: 'district_upazila', label: 'জেলা ও উপজেলা সমাজসেবা অফিস', type: 'text', placeholder: 'জেলা ও উপজেলার নাম', required: true },
+      { name: 'gd_or_reason', label: 'পুনরায় উত্তোলনের কারণ ও জিডি নম্বর (হারিয়ে গেলে)', type: 'text', placeholder: 'হারানো / নষ্ট হওয়া (জিডি থাকলে নম্বর দিন)', required: true },
+      { name: 'nid_gd_doc', label: 'NID/জন্ম নিবন্ধন ও জিডির কপি আপলোড (যদি থাকে)', type: 'file', required: false }
+    ]
+  },
+  {
+    id: 'suborno-special-benefits',
+    title: 'সহায়ক উপকরণ ও পুনর্বাসন আবেদন',
+    titleEn: 'Assistive Device & Rehabilitation Apply',
+    description: 'হুইলচেয়ার, শ্রবণযন্ত্র, কৃত্রিম অঙ্গ, সুদমুক্ত ক্ষুদ্রঋণ ও সরকারি সহায়তা প্রাপ্তির আবেদন',
+    icon: '🦽',
+    color: 'bg-indigo-600',
+    category: 'suborno',
+    price: 150,
+    deliveryTime: '২৪ ঘণ্টা',
+    officialNote: 'প্রতিবন্ধী সেবা ও সাহায্য কেন্দ্র এবং সমাজসেবা অধিদপ্তরের বিশেষ সহায়ক উপকরণ ও পুনর্বাসন সুবিধার আবেদন।',
+    fields: [
+      { name: 'benefit_type', label: 'প্রয়োজনীয় সহায়তা / উপকরণের ধরন', type: 'select', options: ['হুইলচেয়ার / ট্রাইসাইকেল আবেদন', 'হিয়ারিং এইড (শ্রবণযন্ত্র) আবেদন', 'সাদা ছড়ি / চশমা (দৃষ্টি প্রতিবন্ধীদের জন্য)', 'কৃত্রিম অঙ্গ / ক্রাচ / স্ট্যান্ডিং ফ্রেম', 'প্রতিবন্ধী সুদমুক্ত পুনর্বাসন ক্ষুদ্রঋণ', 'বিনামূল্যে ফিজিওথেরাপি ও চিকিৎসা সহায়তা'], required: true },
+      { name: 'applicant_name_pin', label: 'আবেদনকারীর নাম ও সুবর্ণ কার্ড নম্বর (PIN)', type: 'text', placeholder: 'নাম ও সুবর্ণ কার্ড নম্বর', required: true },
+      { name: 'nid_mobile', label: 'NID / জন্ম নিবন্ধন নম্বর ও সচল মোবাইল নম্বর', type: 'text', placeholder: 'NID/জন্ম নিবন্ধন ও মোবাইল নম্বর', required: true },
+      { name: 'district_upazila_address', label: 'জেলা, উপজেলা ও পূর্ণ ঠিকানা', type: 'textarea', placeholder: 'জেলা, উপজেলা, ইউনিয়ন ও গ্রামের নাম লিখুন', required: true },
+      { name: 'suborno_card_copy', label: 'সুবর্ণ নাগরিক কার্ডের কপি আপলোড', type: 'file', required: true }
+    ]
+  },
 
   // ─────────────────────────────────────────────
   // 📄 TIN / ট্যাক্স
@@ -566,6 +733,87 @@ export const services: Service[] = [
   { id: 'hsc-certificate', title: 'HSC সনদ', titleEn: 'HSC Certificate', description: 'HSC/আলিম সনদের সত্যায়িত কপি', icon: '📚', color: 'bg-purple-700', category: 'education', price: 200, inputLabel: 'রোল নাম্বার ও বোর্ড', inputPlaceholder: 'রোল নাম্বার / পাসের সাল / বোর্ড দিন' },
   { id: 'marksheet', title: 'মার্কশিট', titleEn: 'Mark Sheet', description: 'SSC/HSC মার্কশিটের কপি', icon: '📊', color: 'bg-violet-600', category: 'education', price: 150, inputLabel: 'রোল নাম্বার ও পরীক্ষার নাম', inputPlaceholder: 'রোল নাম্বার / পাসের সাল / পরীক্ষার নাম' },
 
+
+  // ─────────────────────────────────────────────
+  // 🔓 Y-Lock সেবা (category: 'ylock')
+  // ─────────────────────────────────────────────
+  {
+    id: 'nid-y-lock-unlock',
+    title: 'NID একাউন্ট Y-Lock আনলক',
+    titleEn: 'NID Account Y-Lock Unlock',
+    description: 'NID সার্ভার একাউন্ট লক বা Y-Lock দ্রুত আনলক করার অফিসিয়াল সেবা',
+    icon: '🔓',
+    color: 'bg-rose-600',
+    category: 'ylock',
+    price: 250,
+    popular: true,
+    deliveryTime: '১-৬ ঘণ্টা',
+    officialNote: 'NID সার্ভার একাউন্ট Y-Lock আনলক করার জন্য নিচের সঠিক তথ্য প্রদান করুন।',
+    fields: [
+      { name: 'nid_or_form_no', label: 'NID নম্বর / ভোটার ফরম নম্বর', type: 'text', placeholder: '১০/১৩/১৭ ডিজিটের NID অথবা ফরম নম্বর দিন', required: true },
+      { name: 'dob', label: 'জন্ম তারিখ (DD/MM/YYYY)', type: 'text', placeholder: 'যেমন: 15/08/1996', required: true },
+      { name: 'applicant_name_parents', label: 'আবেদনকারীর পূর্ণ নাম ও পিতা/মাতার নাম', type: 'text', placeholder: 'নিজের নাম, পিতার নাম ও মাতার নাম', required: true },
+      { name: 'district_upazila', label: 'স্থায়ী ঠিকানা (জেলা ও উপজেলা)', type: 'text', placeholder: 'জেলা ও উপজেলার নাম লিখুন', required: true },
+      { name: 'active_mobile', label: 'সচল মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true },
+      { name: 'lock_screenshot', label: 'লক সমস্যার স্ক্রিনশট বা NID কপি (যদি থাকে)', type: 'file', required: false }
+    ]
+  },
+  {
+    id: 'nid-face-lock-unlock',
+    title: 'NID ফেস ভেরিফিকেশন লক আনলক',
+    titleEn: 'NID Face Verification Lock Unlock',
+    description: 'একাধিকবার ভুল চেষ্টা করার ফলে লক হওয়া NID ফেস ভেরিফিকেশন আনলক সেবা',
+    icon: '👤',
+    color: 'bg-purple-600',
+    category: 'ylock',
+    price: 250,
+    popular: true,
+    deliveryTime: '১-৬ ঘণ্টা',
+    officialNote: 'NID ফেস ভেরিফিকেশন লক (Face Lock) আনলক করার জন্য নিচের তথ্য পূরণ করুন।',
+    fields: [
+      { name: 'nid_no', label: 'NID নম্বর', type: 'text', placeholder: '১০/১৩/১৭ ডিজিটের NID নম্বর দিন', required: true },
+      { name: 'dob', label: 'জন্ম তারিখ (DD/MM/YYYY)', type: 'text', placeholder: 'যেমন: 01/01/1995', required: true },
+      { name: 'full_name', label: 'আবেদনকারীর পূর্ণ নাম', type: 'text', placeholder: 'NID অনুযায়ী পূর্ণ নাম', required: true },
+      { name: 'mobile_no', label: 'রেজিস্টার্ড / সচল মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true }
+    ]
+  },
+  {
+    id: 'nid-otp-mobile-lock-unlock',
+    title: 'NID ওটিপি (OTP) ও মোবাইল লক আনলক',
+    titleEn: 'NID OTP & Mobile Lock Remove',
+    description: 'NID একাউন্টের ওটিপি ব্লক বা মোবাইল নম্বর পরিবর্তনজনিত লক আনলক সেবা',
+    icon: '📲',
+    color: 'bg-indigo-600',
+    category: 'ylock',
+    price: 200,
+    deliveryTime: '১-৪ ঘণ্টা',
+    officialNote: 'NID ওটিপি লক আনলক বা নতুন মোবাইল নম্বর যুক্ত করার জন্য তথ্য দিন।',
+    fields: [
+      { name: 'nid_no', label: 'NID নম্বর ও জন্ম তারিখ', type: 'text', placeholder: 'NID নম্বর ও জন্ম তারিখ (DD/MM/YYYY)', required: true },
+      { name: 'old_and_new_mobile', label: 'আগের মোবাইল নম্বর (জানা থাকলে) ও নতুন সচল মোবাইল নম্বর', type: 'text', placeholder: 'নতুন মোবাইল নম্বর: 01XXXXXXXXX', required: true },
+      { name: 'applicant_name', label: 'আবেদনকারীর নাম ও পিতার নাম', type: 'text', placeholder: 'নাম ও পিতার নাম লিখুন', required: true }
+    ]
+  },
+  {
+    id: 'device-imei-y-lock-unlock',
+    title: 'ডিভাইস / মোবাইল Y-Lock আনলক',
+    titleEn: 'Device / IMEI Y-Lock Unlock',
+    description: 'মোবাইল ফোনের IMEI / কিস্তি লক / ডিভাইস Y-Lock অফিসিয়াল আনলক সেবা',
+    icon: '📱',
+    color: 'bg-teal-600',
+    category: 'ylock',
+    price: 350,
+    popular: true,
+    deliveryTime: '২-১২ ঘণ্টা',
+    officialNote: 'মোবাইল ডিভাইসের Y-Lock বা MDM Lock আনলক করতে ১৫ সংখ্যার সঠিক IMEI নম্বর দিন।',
+    fields: [
+      { name: 'imei_number', label: 'মোবাইলের ১৫ সংখ্যার IMEI নম্বর (*#06# ডায়াল করে দেখুন)', type: 'text', placeholder: '১৫ ডিজিটের IMEI 1 এবং IMEI 2 নম্বর দিন', required: true },
+      { name: 'device_brand_model', label: 'ফোনের ব্র্যান্ড ও মডেলের নাম', type: 'text', placeholder: 'যেমন: Vivo Y17s / Oppo / Samsung / Realme', required: true },
+      { name: 'customer_mobile', label: 'যোগাযোগের সচল মোবাইল নম্বর', type: 'text', placeholder: '01XXXXXXXXX', required: true },
+      { name: 'lock_screen_photo', label: 'লক স্ক্রিনের ছবি আপলোড (যদি থাকে)', type: 'file', required: false }
+    ]
+  },
+
   // ─────────────────────────────────────────────
   // 🔧 অন্যান্য সেবা
   // ─────────────────────────────────────────────
@@ -581,6 +829,7 @@ export const categories = [
   { id: 'all', label: 'সকল সেবা', icon: '⚡' },
   { id: 'nid', label: 'NID সেবা', icon: '🪪' },
   { id: 'birth', label: 'জন্ম নিবন্ধন', icon: '📋' },
+  { id: 'suborno', label: 'সুবর্ণ কার্ড', icon: '♿' },
   { id: 'tax', label: 'TIN/ট্যাক্স', icon: '📄' },
   { id: 'mobile', label: 'মোবাইল সেবা', icon: '📱' },
   { id: 'location', label: 'লোকেশন', icon: '📍' },
@@ -588,11 +837,12 @@ export const categories = [
   { id: 'land', label: 'ভূমি সেবা', icon: '🏡' },
   { id: 'education', label: 'শিক্ষা', icon: '🎓' },
   { id: 'trade', label: 'ট্রেড/ব্যবসা', icon: '🏪' },
+  { id: 'ylock', label: 'Y-Lock সেবা', icon: '🔓' },
   { id: 'other', label: 'অন্যান্য', icon: '🔧' },
 ]
 
 export const stats = [
-  { label: 'মোট সেবা সংখ্যা', value: '৫৪', icon: '⚡' },
+  { label: 'মোট সেবা সংখ্যা', value: '৬২', icon: '⚡' },
   { label: 'মোট ব্যবহারকারী', value: '৩,৩৯,৯৭১', icon: '👥' },
   { label: 'মোট উদ্যোক্তা', value: '৭,৬২৯', icon: '👤' },
   { label: 'মোট সেন্টার', value: '৩২৯', icon: '🏢' },

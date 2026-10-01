@@ -7,7 +7,7 @@ import { Search } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
-const SERVICES_CACHE_KEY = 'nagarik_services_cache_v1'
+const SERVICES_CACHE_KEY = 'nagarik_services_cache_v2'
 
 export default function ServicesPage() {
   // ⚡ শুরু থেকেই staticServices দেখানো হবে, তাই নেট স্লো থাকলেও ০ সেকেন্ডে পেজ ওপেন হবে
@@ -16,18 +16,25 @@ export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    // ১. প্রথমে লোকাল ক্যাশ থেকে চেক করা (যদি আগে কখনো লোড হয়ে থাকে)
+    // পুরনো ক্যাশ মুছে সবসময় নতুন staticServices (Y-Lock, সুবর্ণ কার্ড, ভূমি সেবাসহ) নিশ্চিত করা
+    setServices(staticServices)
     try {
+      localStorage.removeItem('nagarik_services_cache_v1')
       const cached = localStorage.getItem(SERVICES_CACHE_KEY)
       if (cached) {
         const parsed = JSON.parse(cached)
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setServices(parsed)
+          const existingIds = new Set(staticServices.map((s: any) => s.id))
+          const existingTitles = new Set(staticServices.map((s: any) => s.title))
+          const extraFromCache = parsed.filter(
+            (s: any) => !existingIds.has(s.id) && !existingTitles.has(s.title)
+          )
+          setServices([...staticServices, ...extraFromCache])
         }
       }
     } catch (e) {}
 
-    // ২. ব্যাকগ্রাউন্ডে নীরবে ডাটাবেস থেকে আপডেট আনা (ইউজারকে লোডিং না দেখিয়ে)
+    // ব্যাকগ্রাউন্ডে নীরবে ডাটাবেস থেকে আপডেট আনা (ইউজারকে লোডিং না দেখিয়ে)
     async function syncServicesInBackground() {
       try {
         const { data, error } = await supabase
@@ -44,17 +51,17 @@ export default function ServicesPage() {
           inputPlaceholder: s.input_placeholder
         }))
 
-        const existingIds = new Set(mappedData.map((s: any) => s.id))
-        const existingTitles = new Set(mappedData.map((s: any) => s.title))
-        const merged = [
-          ...mappedData,
-          ...staticServices.filter(s => !existingIds.has(s.id) && !existingTitles.has(s.title))
-        ]
+        const existingIds = new Set(staticServices.map((s: any) => s.id))
+        const existingTitles = new Set(staticServices.map((s: any) => s.title))
+        const extraFromDb = mappedData.filter(
+          (s: any) => !existingIds.has(s.id) && !existingTitles.has(s.title)
+        )
+        const merged = [...staticServices, ...extraFromDb]
         
         setServices(merged)
         localStorage.setItem(SERVICES_CACHE_KEY, JSON.stringify(merged))
       } catch (err) {
-        // স্লো নেট বা অফলাইন থাকলে staticServices-ই চলতে থাকবে
+        setServices(staticServices)
       }
     }
 
@@ -92,12 +99,14 @@ export default function ServicesPage() {
           {categories.map(cat => (
             <button 
               key={cat.id} 
+              suppressHydrationWarning
               onClick={() => setActiveCategory(cat.id)} 
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 activeCategory === cat.id ? 'bg-[#7c3aed] text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-[#7c3aed]'
               }`}
             >
-              {cat.icon} {cat.label}
+              <span suppressHydrationWarning>{cat.icon}</span>
+              <span suppressHydrationWarning>{cat.label}</span>
             </button>
           ))}
         </div>

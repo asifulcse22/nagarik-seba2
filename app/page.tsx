@@ -74,6 +74,17 @@ export default function HomePage() {
   useEffect(() => {
     setServices(staticServices)
 
+    // ডেভেলপমেন্টে পুরনো Service Worker ক্যাশ থাকলে তা ক্লিয়ার করা যাতে নতুন সার্ভিস সাথে সাথে দেখায়
+    if (typeof window !== 'undefined' && 'caches' in window) {
+      caches.keys().then(keys => {
+        keys.forEach(key => {
+          if (key.includes('nagarik-sheba')) {
+            caches.delete(key)
+          }
+        })
+      }).catch(() => {})
+    }
+
     async function fetchUserCount() {
       try {
         const { count } = await supabase
@@ -227,13 +238,13 @@ export default function HomePage() {
         </div>
 
         {/* ক্যাটাগরি ফিল্টার বাটনসমূহ */}
-        {/*<div className="flex gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar"> */}
-           <div className="flex flex-wrap gap-3 mb-4">
+        <div className="flex flex-wrap gap-3 mb-4">
           {categories.map(cat => {
             const isActive = activeCategory === cat.id
             return (
               <button
                 key={cat.id}
+                suppressHydrationWarning
                 onClick={() => setActiveCategory(cat.id)}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer border ${
                   isActive
@@ -241,8 +252,8 @@ export default function HomePage() {
                     : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300 hover:text-purple-700'
                 }`}
               >
-                <span>{cat.icon}</span>
-                <span>{cat.label}</span>
+                <span suppressHydrationWarning>{cat.icon}</span>
+                <span suppressHydrationWarning>{cat.label}</span>
               </button>
             )
           })}
