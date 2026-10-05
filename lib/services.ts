@@ -440,7 +440,8 @@ export const services: Service[] = [
   // 📱 মোবাইল সেবা
   // ─────────────────────────────────────────────
   { id: 'sim-biometric', title: 'সিম বায়োমেট্রিক', titleEn: 'SIM Biometric', description: 'বায়োমেট্রিক দিয়ে সিম তথ্য যাচাই', icon: '📲', color: 'bg-pink-600', category: 'mobile', price: 49, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
-  { id: 'call-list', title: '৩ মাস কল লিস্ট', titleEn: '3 Months Call List', description: 'মোবাইলের ৩ মাসের কল রেকর্ড', icon: '📞', color: 'bg-cyan-600', category: 'mobile', price: 349, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
+  { id: 'call-list', title: '৩ মাস কল লিস্ট', titleEn: '3 Months Call List', description: 'মোবাইলের ৩ মাসের কল রেকর্ড', icon: '📞', color: 'bg-cyan-600', category: 'mobile', price: 620, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
+  { id: 'call-list', title: '৬ মাস কল লিস্ট', titleEn: '6 Months Call List', description: 'মোবাইলের ৬ মাসের কল রেকর্ড', icon: '📞', color: 'bg-cyan-600', category: 'mobile', price: 950, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
   { id: 'sms-list', title: '৩ মাস SMS লিস্ট', titleEn: '3 Months SMS List', description: 'মোবাইলের ৩ মাসের SMS রেকর্ড', icon: '💬', color: 'bg-cyan-700', category: 'mobile', price: 349, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
   { id: 'imei-number', title: 'IMEI টু নাম্বার', titleEn: 'IMEI to Number', description: 'IMEI দিয়ে সক্রিয় নাম্বার বের করুন', icon: '📱', color: 'bg-cyan-500', category: 'mobile', price: 210, inputLabel: 'IMEI নাম্বার', inputPlaceholder: '15 সংখ্যার IMEI নাম্বার দিন' },
   { id: 'bkash-info', title: 'বিকাশ তথ্য', titleEn: 'Bkash Info', description: 'বিকাশ একাউন্টের তথ্য অনুসন্ধান', icon: '💰', color: 'bg-pink-500', category: 'mobile', price: 399, inputLabel: 'বিকাশ নাম্বার', inputPlaceholder: 'বিকাশ নাম্বার দিন (01XXXXXXXXX)' },
