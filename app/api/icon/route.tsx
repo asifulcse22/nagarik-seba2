@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -16,7 +16,8 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #6b0f9c 0%, #9b1fe8 100%)',
+          background:
+            'linear-gradient(135deg, #6b0f9c 0%, #9b1fe8 100%)',
           borderRadius: Math.round(size * 0.22),
           color: '#ffffff',
           fontSize: Math.round(size * 0.55),
