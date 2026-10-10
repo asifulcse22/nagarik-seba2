@@ -41,7 +41,7 @@ export default function Navbar() {
           {/* ডান পাশের বাটন - মোবাইলে এক লাইনে সুন্দরভাবে ফিট হবে */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <a
-              href="https://wa.me/message/46NDI6H4ZPSIA1"
+              href="https://wa.me/message/IRJQGSC2B72EE1"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#00c853] hover:bg-[#00b34a] text-white font-bold text-[11px] sm:text-sm rounded-full shadow-md transition-all hover:-translate-y-0.5 whitespace-nowrap"

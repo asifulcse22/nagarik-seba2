@@ -265,10 +265,10 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {filteredServices.map(s => (
-              <Link
-                key={s.id}
-                href="/dashboard"
+            {filteredServices.map((s, index) => (
+            <Link
+              key={`${s.id}-${index}`}
+              href="/dashboard"
                 className="relative bg-emerald-50 rounded-2xl p-5 text-center border border-emerald-100 shadow-sm hover:shadow-md transition group"
               >
                 {s.deliveryTime && (

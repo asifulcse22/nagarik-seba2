@@ -1,7 +1,7 @@
 export interface LandFormField {
   name: string
   label: string
-  type: 'text' | 'select' | 'textarea' | 'file'
+  type: 'text' | 'select' | 'textarea' | 'file' | 'tel' | 'date' | 'password'
   placeholder?: string
   required: boolean
   options?: string[]
@@ -21,6 +21,7 @@ export interface Service {
   inputLabel?: string
   inputPlaceholder?: string
   officialNote?: string
+  requirements?: string[]
   fields?: LandFormField[]
 }
 
@@ -102,6 +103,82 @@ export const services: Service[] = [
     inputLabel: 'আইডি নাম্বার ও জন্ম তারিখ', 
     inputPlaceholder: 'আইডি নাম্বার / জন্ম তারিখ (DD/MM/YYYY)' 
   },
+
+  {
+  id: 'nid-password-set',
+  title: 'NID পাসওয়ার্ড সেট ও রিসেট',
+  titleEn: 'NID Portal Password Set / Reset',
+  category: 'nid', // আপনার ক্যাটাগরি আইডি অনুযায়ী (যেমন: 'nid' অথবা 'national-id')
+  icon: '🔐',
+  color: 'bg-indigo-100',
+  price: 110, // আপনার পছন্দমতো সার্ভিস চার্জ
+  deliveryTime: '৫-১০ মিনিট',
+  description: 'নির্বাচন কমিশন পোর্টালে নতুন পাসওয়ার্ড তৈরি, ভুলে যাওয়া পাসওয়ার্ড রিসেট ও অ্যাকাউন্ট আনলক সেবা।',
+  requirements: [
+    '১০ বা ১৭ ডিজিটের এনআইডি নম্বর',
+    'সঠিক জন্ম তারিখ (দিন-মাস-বছর)',
+    'এনআইডি অনুযায়ী বর্তমান ও স্থায়ী ঠিকানার জেলা ও উপজেলা',
+    'ওটিপি (OTP) গ্রহণের জন্য সচল মোবাইল নম্বর',
+    'NID Wallet অ্যাপ দিয়ে ফেস ভেরিফিকেশন'
+  ],
+  fields: [
+    {
+      name: 'nidNumber',
+      label: 'জাতীয় পরিচয়পত্র নম্বর (NID No)',
+      type: 'text',
+      placeholder: '১০ বা ১৭ ডিজিটের নম্বর লিখুন',
+      required: true,
+    },
+    {
+      name: 'dob',
+      label: 'জন্ম তারিখ (Date of Birth)',
+      type: 'date',
+      required: true,
+    },
+    {
+      name: 'division',
+      label: 'বিভাগ',
+      type: 'text',
+      placeholder: 'যেমন: ঢাকা',
+      required: true,
+    },
+    {
+      name: 'district',
+      label: 'জেলা',
+      type: 'text',
+      placeholder: 'যেমন: গাজীপুর',
+      required: true,
+    },
+    {
+      name: 'upazila',
+      label: 'উপজেলা / থানা',
+      type: 'text',
+      placeholder: 'যেমন: শ্রীপুর',
+      required: true,
+    },
+    {
+      name: 'mobile',
+      label: 'সচল মোবাইল নম্বর',
+      type: 'tel',
+      placeholder: '01XXXXXXXXX',
+      required: true,
+    },
+    {
+      name: 'newPassword',
+      label: 'কাঙ্ক্ষিত নতুন পাসওয়ার্ড',
+      type: 'password',
+      placeholder: 'কমপক্ষে ৮ ডিজিটের পাসওয়ার্ড দিন',
+      required: true,
+    },
+    {
+      name: 'notes',
+      label: 'বিশেষ নোট / সমস্যা (ঐচ্ছিক)',
+      type: 'textarea',
+      placeholder: 'পূর্বে কোনো অ্যাকাউন্ট ছিল কি না বা কোনো সমস্যা থাকলে লিখুন',
+      required: false,
+    }
+  ]
+},
 
   // নতুন ৪টি আইডি কার্ড সংশোধন সেবা (৩ দিন সময়):
   { 
@@ -442,11 +519,11 @@ export const services: Service[] = [
   { id: 'sim-biometric', title: 'সিম বায়োমেট্রিক', titleEn: 'SIM Biometric', description: 'বায়োমেট্রিক দিয়ে সিম তথ্য যাচাই', icon: '📲', color: 'bg-pink-600', category: 'mobile', price: 49, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
   { id: 'call-list', title: '৩ মাস কল লিস্ট', titleEn: '3 Months Call List', description: 'মোবাইলের ৩ মাসের কল রেকর্ড', icon: '📞', color: 'bg-cyan-600', category: 'mobile', price: 620, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
   { id: 'call-list', title: '৬ মাস কল লিস্ট', titleEn: '6 Months Call List', description: 'মোবাইলের ৬ মাসের কল রেকর্ড', icon: '📞', color: 'bg-cyan-600', category: 'mobile', price: 950, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
-  { id: 'sms-list', title: '৩ মাস SMS লিস্ট', titleEn: '3 Months SMS List', description: 'মোবাইলের ৩ মাসের SMS রেকর্ড', icon: '💬', color: 'bg-cyan-700', category: 'mobile', price: 349, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
+  { id: 'sms-list', title: '৩ মাস SMS লিস্ট', titleEn: '3 Months SMS List', description: 'মোবাইলের ৩ মাসের SMS রেকর্ড', icon: '💬', color: 'bg-cyan-700', category: 'mobile', price: 800, inputLabel: 'মোবাইল নাম্বার', inputPlaceholder: '01XXXXXXXXX নাম্বার দিন' },
   { id: 'imei-number', title: 'IMEI টু নাম্বার', titleEn: 'IMEI to Number', description: 'IMEI দিয়ে সক্রিয় নাম্বার বের করুন', icon: '📱', color: 'bg-cyan-500', category: 'mobile', price: 210, inputLabel: 'IMEI নাম্বার', inputPlaceholder: '15 সংখ্যার IMEI নাম্বার দিন' },
-  { id: 'bkash-info', title: 'বিকাশ তথ্য', titleEn: 'Bkash Info', description: 'বিকাশ একাউন্টের তথ্য অনুসন্ধান', icon: '💰', color: 'bg-pink-500', category: 'mobile', price: 399, inputLabel: 'বিকাশ নাম্বার', inputPlaceholder: 'বিকাশ নাম্বার দিন (01XXXXXXXXX)' },
-  { id: 'nagad-info', title: 'নগদ তথ্য', titleEn: 'Nagad Info', description: 'নগদ একাউন্টের তথ্য অনুসন্ধান', icon: '💸', color: 'bg-orange-500', category: 'mobile', price: 399, inputLabel: 'নগদ নাম্বার', inputPlaceholder: 'নগদ নাম্বার দিন (01XXXXXXXXX)' },
-  { id: 'rocket-info', title: 'রকেট তথ্য', titleEn: 'Rocket Info', description: 'ডাচ বাংলা রকেট তথ্য অনুসন্ধান', icon: '🚀', color: 'bg-purple-500', category: 'mobile', price: 399, inputLabel: 'রকেট নাম্বার', inputPlaceholder: 'রকেট নাম্বার দিন (01XXXXXXXXX)' },
+  { id: 'bkash-info', title: 'বিকাশ তথ্য', titleEn: 'Bkash Info', description: 'বিকাশ একাউন্টের তথ্য অনুসন্ধান', icon: '💰', color: 'bg-pink-500', category: 'mobile', price: 680, inputLabel: 'বিকাশ নাম্বার', inputPlaceholder: 'বিকাশ নাম্বার দিন (01XXXXXXXXX)' },
+  { id: 'nagad-info', title: 'নগদ তথ্য', titleEn: 'Nagad Info', description: 'নগদ একাউন্টের তথ্য অনুসন্ধান', icon: '💸', color: 'bg-orange-500', category: 'mobile', price: 680, inputLabel: 'নগদ নাম্বার', inputPlaceholder: 'নগদ নাম্বার দিন (01XXXXXXXXX)' },
+  { id: 'rocket-info', title: 'রকেট তথ্য', titleEn: 'Rocket Info', description: 'ডাচ বাংলা রকেট তথ্য অনুসন্ধান', icon: '🚀', color: 'bg-purple-500', category: 'mobile', price: 680, inputLabel: 'রকেট নাম্বার', inputPlaceholder: 'রকেট নাম্বার দিন (01XXXXXXXXX)' },
 
   // ─────────────────────────────────────────────
   // 📍 লোকেশন ট্র্যাকিং

@@ -13,7 +13,7 @@ import type { Profile } from '@/lib/supabase'
 import { categories, services as staticServices } from '@/lib/services'
 import type { LandFormField } from '@/lib/services'
 
-const WHATSAPP_LINK = "https://wa.me/message/46NDI6H4ZPSIA1"
+const WHATSAPP_LINK = "https://wa.me/message/IRJQGSC2B72EE1"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -843,13 +843,13 @@ export default function DashboardPage() {
 
           {/* সার্ভিস কার্ড গ্রিড */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
-            {filteredServices.map(service => {
+            {filteredServices.map((service, index) => {
               const currentBalance = profile?.balance || 0
               const needsRecharge = currentBalance < service.price
 
               return (
                 <div
-                  key={service.id}
+                  key={`${service.id}-${index}`}
                   onClick={() => handleServiceClick(service)}
                   className="bg-white hover:bg-gradient-to-br hover:from-white hover:to-purple-50/40 rounded-3xl p-5 flex flex-col items-center text-center border border-purple-100/70 shadow-sm hover:shadow-lg hover:border-purple-300 hover:-translate-y-1 transition group cursor-pointer relative"
                 >
