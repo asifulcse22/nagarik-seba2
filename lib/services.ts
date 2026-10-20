@@ -558,7 +558,7 @@ export const services: Service[] = [
     icon: '🏡',
     color: 'bg-lime-700',
     category: 'land',
-    price: 500,
+    price: 0,
     popular: true,
     deliveryTime: '২৪-৪৮ ঘণ্টা',
     officialNote: 'ই-নামজারি আবেদনের জন্য জমির তফসিল, দলিল, খতিয়ান ও আবেদনকারীর NID তথ্য প্রদান করুন।',
